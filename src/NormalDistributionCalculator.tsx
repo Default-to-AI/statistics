@@ -278,7 +278,7 @@ const NormalChart: React.FC<{
 
   return (
     <div className={`w-full rounded-2xl p-4 border transition-colors ${
-      theme === 'dark' ? 'bg-slate-905 border-slate-800' : 'bg-white border-slate-100'
+      theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'
     }`}>
       <div className="mb-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-b pb-4 border-slate-100 dark:border-slate-800">
         <h3 className={`text-base font-bold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-700'}`}>
@@ -549,6 +549,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
   const [searchType, setSearchType] = useState<'z' | 'phi'>('z');
   const [searchVal, setSearchVal] = useState<string>(activeZ?.toFixed(2) || '');
   const [phiSearchVal, setPhiSearchVal] = useState<string>('');
+  const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
   
   useEffect(() => {
     if (activeZ !== null) {
@@ -601,7 +602,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
   const colVal = lookupZ !== null ? Math.round((lookupZ - rowVal!) * 100) / 100 : null;
 
   const renderTableSection = (tableRows: number[]) => (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-850">
+    <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
       <table className="w-full text-xs sm:text-sm border-collapse">
         <thead>
           <tr className="bg-slate-100 dark:bg-slate-800">
@@ -635,7 +636,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
                 <td className={`p-2.5 border border-slate-200 dark:border-slate-700 font-black text-center text-sm transition-colors duration-300 ${
                   isRowActive 
                     ? 'bg-blue-600 text-white dark:bg-blue-500' 
-                    : 'text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-850'
+                    : 'text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-900'
                 }`}>
                   {r.toFixed(1)}
                 </td>
@@ -648,7 +649,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
                   return (
                     <td 
                       key={c} 
-                      className={`p-2.5 border border-slate-200 dark:border-slate-755 text-center transition-all duration-300 tabular-nums ${
+                      className={`p-2.5 border border-slate-200 dark:border-slate-700 text-center transition-all duration-300 tabular-nums ${
                         isActive 
                           ? 'bg-blue-600 text-white dark:bg-blue-500 font-black scale-102 shadow-lg z-10 relative rounded-md' 
                           : isRowActive
@@ -672,45 +673,74 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
 
   return (
     <div className={`overflow-hidden border rounded-2xl shadow-xl transition-all ${
-      theme === 'dark' ? 'bg-slate-900 border-slate-850' : 'bg-white border-slate-200'
+      theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
     } ${!showSearch ? 'mt-4' : ''}`}>
-      {/* Educational Header */}
-      <div className="p-6 bg-gradient-to-br from-slate-800 to-slate-950 text-white">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2.5 bg-blue-500 rounded-xl shadow-lg shadow-blue-500/20">
-            <BookOpen size={20} className="text-white" />
+      {/* Educational Header - Interactive Collapsible Accordion */}
+      <button 
+        type="button"
+        onClick={() => setIsGuideOpen(!isGuideOpen)}
+        className="w-full text-right p-5 bg-gradient-to-br from-slate-800 to-slate-950 text-white flex items-center justify-between hover:from-slate-750 hover:to-slate-900 transition-all cursor-pointer border-b border-white/5 active:scale-[0.99]"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
+            <BookOpen size={18} className="text-white" />
           </div>
-          <h3 className="text-lg font-bold tracking-tight">איך קוראים את טבלת Z?</h3>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-right">
-          <div className="space-y-3 p-4 bg-white/5 rounded-xl border border-white/10">
-            <div className="flex items-center gap-2 text-blue-400 font-bold">
-              <div className="w-2.5 h-2.5 rounded-full bg-blue-400" />
-              ערך ה-Z (ציון התקן)
-            </div>
-            <p className="text-sm text-slate-300 leading-relaxed">
-              מופיע <strong>בשולי הטבלה</strong> (אנכית ואופקית). השורה מציינת את השלם והעשירית, והעמודה את המאית.
+          <div>
+            <h3 className="text-base sm:text-lg font-black tracking-tight flex items-center gap-2">
+              איך קוראים את טבלת Z?
+            </h3>
+            <p className="text-xs text-slate-350 mt-0.5 font-bold">
+              {isGuideOpen ? 'לחץ לכיווץ והסתרת ההנחיות' : 'לחץ להצגת הסבר קצר ושימושי לקריאת הטבלה'}
             </p>
-            <div className="text-xs bg-blue-500/15 p-2 rounded-lg border border-blue-500/20 text-blue-200" dir="rtl">
-              דוגמה: למציאת <InlineMath math="Z=1.96" />, נבחר שורה 1.9 ועמודה 0.06.
-            </div>
-          </div>
-          
-          <div className="space-y-3 p-4 bg-white/5 rounded-xl border border-white/10">
-            <div className="flex items-center gap-2 text-emerald-400 font-bold">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-              ערך ה-PHI (ההסתברות)
-            </div>
-            <p className="text-sm text-slate-300 leading-relaxed">
-              מופיע <strong>בתוך הטבלה (תאים לבנים)</strong>. זהו השטח המצטבר שמתחת לעקומת הפעמון המצטבר משמאל לערך ה-Z.
-            </p>
-            <div className="text-xs bg-emerald-500/15 p-2 rounded-lg border border-emerald-500/20 text-emerald-250" dir="rtl">
-              דוגמה: בתוך הטבלה נמצא את השטיח 0.9750 המייצג את הערך Z של 1.96.
-            </div>
           </div>
         </div>
-      </div>
+        <div className="p-1.5 rounded-lg bg-white/10 text-blue-400">
+          <ChevronDown 
+            size={18} 
+            className={`transition-transform duration-300 ${isGuideOpen ? 'rotate-180' : ''}`} 
+          />
+        </div>
+      </button>
+      
+      <AnimatePresence initial={false}>
+        {isGuideOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="overflow-hidden bg-slate-950/45 border-b border-slate-800"
+          >
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-right">
+              <div className="space-y-3 p-4 bg-white/5 rounded-xl border border-white/10">
+                <div className="flex items-center gap-2 text-blue-400 font-bold">
+                  <div className="w-2.5 h-2.5 rounded-full bg-blue-400" />
+                  ערך ה-Z (ציון התקן)
+                </div>
+                <p className="text-sm text-slate-300 leading-relaxed font-semibold">
+                  מופיע <strong>בשולי הטבלה</strong> (אנכית ואופקית). השורה מציינת את השלם והעשירית, והעמודה את המאית.
+                </p>
+                <div className="text-xs bg-blue-500/15 p-2 rounded-lg border border-blue-500/20 text-blue-200" dir="rtl">
+                  דוגמה: למציאת <InlineMath math="Z=1.96" />, נבחר שורה 1.9 ועמודה 0.06.
+                </div>
+              </div>
+              
+              <div className="space-y-3 p-4 bg-white/5 rounded-xl border border-white/10">
+                <div className="flex items-center gap-2 text-emerald-400 font-bold">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+                  ערך ה-PHI (ההסתברות)
+                </div>
+                <p className="text-sm text-slate-300 leading-relaxed font-semibold">
+                  מופיע <strong>בתוך הטבלה (תאים לבנים)</strong>. זהו השטח המצטבר שמתחת לעקומת הפעמון המצטבר משמאל לערך ה-Z.
+                </p>
+                <div className="text-xs bg-emerald-500/15 p-2 rounded-lg border border-emerald-500/20 text-emerald-250" dir="rtl">
+                  דוגמה: בתוך הטבלה נמצא את השטח 0.9750 המייצג את הערך Z של 1.96.
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Search Controls */}
       <div className={`p-5 border-b ${theme === 'dark' ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
@@ -1291,7 +1321,7 @@ export default function NormalDistributionCalculator() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               className={`rounded-2xl p-6 border shadow-sm transition-all ${
-                theme === 'dark' ? 'bg-slate-900 border-slate-850' : 'bg-white border-slate-200'
+                theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
               }`}
             >
               <div className="mb-6">
@@ -1309,7 +1339,7 @@ export default function NormalDistributionCalculator() {
               {/* Left Column Input Panel */}
               <section className="lg:col-span-5 space-y-6">
                 <div className={`rounded-2xl p-6 border shadow-sm transition-all ${
-                  theme === 'dark' ? 'bg-slate-900 border-slate-850' : 'bg-white border-slate-200'
+                  theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
                 }`}>
                   
                   {/* Informational Widget */}
@@ -1344,10 +1374,10 @@ export default function NormalDistributionCalculator() {
                         type="text" 
                         value={meanInput} 
                         onChange={(e) => handleMeanChange(e.target.value)}
-                        className={`w-full px-4 py-2 bg-slate-50 dark:bg-slate-850 border rounded-xl outline-none transition-all font-mono font-bold ${
+                        className={`w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none transition-all font-mono font-bold text-slate-900 dark:text-slate-100 ${
                           meanError 
                             ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' 
-                            : 'border-slate-200 dark:border-slate-800 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 dark:text-slate-100'
+                            : 'border-slate-200 dark:border-slate-700 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500'
                         }`}
                         placeholder="הזן ממוצע, לדוגמה: 170"
                       />
@@ -1368,10 +1398,10 @@ export default function NormalDistributionCalculator() {
                         type="text" 
                         value={stdDevInput} 
                         onChange={(e) => handleStdDevChange(e.target.value)}
-                        className={`w-full px-4 py-2 bg-slate-50 dark:bg-slate-850 border rounded-xl outline-none transition-all font-mono font-bold ${
+                        className={`w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none transition-all font-mono font-bold text-slate-900 dark:text-slate-100 ${
                           stdDevError 
                             ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' 
-                            : 'border-slate-200 dark:border-slate-800 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 dark:text-slate-100'
+                            : 'border-slate-200 dark:border-slate-700 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500'
                         }`}
                         placeholder="חייב להיות גדול מ-0"
                       />
@@ -1501,7 +1531,7 @@ export default function NormalDistributionCalculator() {
                                 type="number" 
                                 value={x1}
                                 onChange={(e) => setX1(Number(e.target.value))}
-                                className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-xl outline-none font-mono font-bold text-sm"
+                                className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono font-bold text-sm text-slate-900 dark:text-slate-100"
                               />
                             </div>
                             { (type === 'between' || type === 'outside') && (
@@ -1511,7 +1541,7 @@ export default function NormalDistributionCalculator() {
                                   type="number" 
                                   value={x2}
                                   onChange={(e) => setX2(Number(e.target.value))}
-                                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-xl outline-none font-mono font-bold text-sm"
+                                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono font-bold text-sm text-slate-900 dark:text-slate-100"
                                 />
                               </div>
                             )}
@@ -1561,7 +1591,7 @@ export default function NormalDistributionCalculator() {
                               max="99.99"
                               step="0.01"
                               onChange={(e) => setPercentile(Math.min(99.99, Math.max(0.01, Number(e.target.value))))}
-                              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-xl outline-none font-mono font-bold text-sm pl-10"
+                              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono font-bold text-sm pl-10 text-slate-900 dark:text-slate-100"
                             />
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">%</span>
                           </div>
@@ -1602,7 +1632,7 @@ export default function NormalDistributionCalculator() {
                 
                 {/* Dynamically Styled Math steps */}
                 <div className={`rounded-2xl p-6 border shadow-sm transition-colors ${
-                  theme === 'dark' ? 'bg-slate-900 border-slate-850' : 'bg-white border-slate-200'
+                  theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
                 }`}>
                   <h2 className="text-base font-black mb-4 flex items-center gap-2 border-b pb-3 border-slate-100 dark:border-slate-800">
                     <Calculator size={16} className="text-blue-500" />
@@ -1634,7 +1664,7 @@ export default function NormalDistributionCalculator() {
 
                 {/* Curve Visualization Area */}
                 <div className={`rounded-2xl p-6 border shadow-sm transition-colors ${
-                  theme === 'dark' ? 'bg-slate-900 border-slate-850' : 'bg-white border-slate-200'
+                  theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
                 }`}>
                   <NormalChart 
                     mean={mean} 
@@ -1652,22 +1682,23 @@ export default function NormalDistributionCalculator() {
                   />
                 </div>
 
-                {/* Z-Table Lookup helper links right beneath the core loop */}
-                {isValidToCalculate && (result.z1 !== undefined || result.z2 !== undefined) && (
-                  <div className={`rounded-2xl p-5 border shadow-sm transition-colors ${
-                    theme === 'dark' ? 'bg-slate-900 border-slate-850' : 'bg-white border-slate-200'
-                  }`}>
-                    <h3 className="text-sm font-black mb-3 text-slate-400 flex items-center gap-1.5 leading-none">
-                      <Info size={14} className="text-blue-500" />
-                      איתור ציוני Z בטבלה
-                    </h3>
-                    <div className="space-y-6">
-                      <ZTable activeZ={result.z1} theme={theme} />
-                      {result.z2 !== undefined && <ZTable activeZ={result.z2} theme={theme} />}
-                    </div>
-                  </div>
-                )}
               </section>
+
+              {/* Z-Table Lookup helper links right beneath the core loop */}
+              {isValidToCalculate && (result.z1 !== undefined || result.z2 !== undefined) && (
+                <div className={`lg:col-span-12 rounded-2xl p-5 border shadow-sm transition-colors ${
+                  theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+                }`}>
+                  <h3 className="text-sm font-black mb-3 text-slate-400 flex items-center gap-1.5 leading-none">
+                    <Info size={14} className="text-blue-500" />
+                    איתור ציוני Z בטבלה
+                  </h3>
+                  <div className="space-y-6">
+                    <ZTable activeZ={result.z1} theme={theme} />
+                    {result.z2 !== undefined && <ZTable activeZ={result.z2} theme={theme} />}
+                  </div>
+                </div>
+              )}
 
             </div>
           )}
@@ -1676,7 +1707,7 @@ export default function NormalDistributionCalculator() {
       </main>
 
       {/* Footer */}
-      <footer className="max-w-5xl mx-auto px-4 py-12 text-center text-xs font-bold text-slate-400/80 tracking-wide border-t border-slate-100 dark:border-slate-850 mt-12">
+      <footer className="max-w-5xl mx-auto px-4 py-12 text-center text-xs font-bold text-slate-400/80 tracking-wide border-t border-slate-100 dark:border-slate-800 mt-12">
         <p>© {new Date().getFullYear()} מחשבון התפלגות נורמלית מתקדם - פותח על ידי רוברט תיגר עבור סטודנטים</p>
       </footer>
     </div>
