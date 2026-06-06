@@ -369,7 +369,7 @@ const NormalChart: React.FC<{
           {type === 'conditional' ? 'גרף התפלגות מותנית P(A|B)' : 'עקומת פעמון ושטחים מחושבים'}
         </h3>
         <span className={`px-3 py-1 rounded-full text-xs font-black tracking-wide shrink-0 ${
-          theme === 'dark' ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-50 text-blue-750'
+          theme === 'dark' ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-50 text-blue-700'
         }`}>
           {type === 'conditional' ? `P(A|B) = ${probability.toFixed(4)}` : `שטח מחושב: ${(probability * 100).toFixed(2)}%`}
         </span>
@@ -758,7 +758,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
                   return (
                     <td 
                       key={c} 
-                      className={`p-2.5 border border-slate-200 dark:border-slate-705 text-center transition-all duration-300 tabular-nums ${
+                      className={`p-2.5 border border-slate-200 dark:border-slate-700 text-center transition-all duration-300 tabular-nums ${
                         isActive 
                           ? 'bg-blue-600 text-white dark:bg-blue-500 font-extrabold scale-102 shadow-lg z-10 relative rounded-md' 
                           : isRowActive
@@ -800,7 +800,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
                   key={idx}
                   className={`sticky top-0 p-2.5 border border-slate-200 dark:border-slate-700 font-bold text-center transition-colors min-w-[70px] z-20 ${
                     isActiveCol
-                      ? 'bg-indigo-600 text-white dark:bg-indigo-550'
+                      ? 'bg-indigo-600 text-white dark:bg-indigo-600'
                       : 'bg-slate-100 dark:bg-slate-800'
                   }`}
                 >
@@ -837,7 +837,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
                       key={colIdx}
                       className={`p-2.5 border border-slate-200 dark:border-slate-700 text-center transition-all duration-300 tabular-nums ${
                         isActive 
-                          ? 'bg-indigo-600 text-white dark:bg-indigo-550 font-black scale-102 shadow-lg z-10 relative rounded-md' 
+                          ? 'bg-indigo-600 text-white dark:bg-indigo-600 font-black scale-102 shadow-lg z-10 relative rounded-md' 
                           : isRowActive
                             ? 'bg-indigo-100/40 text-indigo-900 dark:bg-indigo-900/20 dark:text-indigo-300 font-semibold'
                             : isActiveCol
@@ -865,7 +865,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
       <button 
         type="button"
         onClick={() => setIsGuideOpen(!isGuideOpen)}
-        className="w-full text-right p-5 bg-gradient-to-br from-slate-800 to-slate-950 text-white flex items-center justify-between hover:from-slate-755 hover:to-slate-900 transition-all cursor-pointer border-b border-white/5 active:scale-[0.99]"
+        className="w-full text-right p-5 bg-gradient-to-br from-slate-800 to-slate-950 text-white flex items-center justify-between hover:from-slate-700 hover:to-slate-900 transition-all cursor-pointer border-b border-white/5 active:scale-[0.99]"
       >
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
@@ -921,7 +921,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
                   דרגות החופש (df) מופיעות <strong>בשורה האנכית הימנית</strong>, ואילו רמות המובהקות (<InlineMath math="\alpha" /> חד-צדדי או דו-צדדי) מופיעות <strong>בראש העמודות</strong>. 
                   מפגש השורה והעמודה נותן את ערך ה-T הפיזי הקריטי המבוקש.
                 </p>
-                <div className="text-xs bg-indigo-500/15 p-2 rounded-lg border border-indigo-500/20 text-indigo-250" dir="rtl">
+                <div className="text-xs bg-indigo-500/15 p-2 rounded-lg border border-indigo-500/20 text-indigo-700 dark:text-indigo-300" dir="rtl">
                   דוגמה: עבור <InlineMath math="df = 10" /> ובדיקה דו-צדדית עם <InlineMath math="\alpha = 0.05" />, נקבל ערך קריטי של <InlineMath math="t = 2.2281" />.
                 </div>
               </div>
@@ -981,7 +981,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
                     value={searchVal}
                     onChange={(e) => setSearchVal(e.target.value)}
                     placeholder="1.96"
-                    className="w-16 text-xs font-black outline-none bg-transparent text-blue-600 dark:text-blue-400 border-b border-slate-200 dark:border-slate-705 text-center"
+                    className="w-16 text-xs font-black outline-none bg-transparent text-blue-600 dark:text-blue-400 border-b border-slate-200 dark:border-slate-700 text-center"
                   />
                 ) : (
                   <input 
@@ -992,7 +992,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
                     value={phiSearchVal}
                     onChange={(e) => setPhiSearchVal(e.target.value)}
                     placeholder="0.95"
-                    className="w-16 text-xs font-black outline-none bg-transparent text-emerald-600 dark:text-emerald-400 border-b border-slate-200 dark:border-slate-705 text-center"
+                    className="w-16 text-xs font-black outline-none bg-transparent text-emerald-600 dark:text-emerald-400 border-b border-slate-200 dark:border-slate-700 text-center"
                   />
                 )}
               </div>
@@ -1052,7 +1052,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-4 bg-indigo-50/60 dark:bg-indigo-950/20 text-indigo-900 dark:text-indigo-200 border border-indigo-150 dark:border-indigo-900/30 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 font-sans shadow-sm"
+              className="p-4 bg-indigo-50/60 dark:bg-indigo-950/20 text-indigo-900 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-900/30 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 font-sans shadow-sm"
             >
               <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-lg">
@@ -1119,7 +1119,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
           ) : (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-blue-500/10 dark:bg-blue-550/10 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-500/20">
+                <div className="p-2.5 bg-blue-500/10 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-500/20">
                   <Calculator size={18} className="stroke-[2.5]" />
                 </div>
                 <div className="text-right">

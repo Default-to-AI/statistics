@@ -21,8 +21,10 @@ import {
   Maximize2,
   Minimize2,
   Sliders,
-  Award
+  Award,
+  Sparkles
 } from 'lucide-react';
+import StatisticalHelperModal from './StatisticalHelperModal';
 
 interface FormulaSheetProps {
   theme: 'light' | 'dark';
@@ -52,6 +54,15 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
 
   // Stats description calculator state
   const [descInput, setDescInput] = useState<string>('12, 15, 15, 17, 20, 22, 25, 30');
+
+  // Math visual helper state
+  const [helperModalOpen, setHelperModalOpen] = useState<boolean>(false);
+  const [helperModalTab, setHelperModalTab] = useState<'sigma-vs-s' | 'standard-error' | 'sqrt-intuition'>('sigma-vs-s');
+  
+  const openHelper = (tab: 'sigma-vs-s' | 'standard-error' | 'sqrt-intuition') => {
+    setHelperModalTab(tab);
+    setHelperModalOpen(true);
+  };
   
   const sectionRefs = {
     c1: useRef<HTMLDivElement>(null),
@@ -215,9 +226,9 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
           content: (
             <div className="space-y-3">
               <p className="text-sm leading-relaxed">
-                <strong>חיתוך (<InlineMath math="A \cap B" />):</strong> המאורע שבו מתרחשים <strong>גם</strong> מאורע <InlineMath math="A" /> <strong>וגם</strong> מאורע <InlineMath math="B" /> בו-זמנית.
+                <strong>חיתוך <InlineMath math="(A \cap B)" />:</strong> המאורע שבו מתרחשים <strong>גם</strong> מאורע <InlineMath math="A" /> <strong>וגם</strong> מאורע <InlineMath math="B" /> בו-זמנית.
                 <br />
-                <strong>איחוד (<InlineMath math="A \cup B" />):</strong> המאורע שבו מתרחש מאורע <InlineMath math="A" /> <strong>או</strong> מאורע <InlineMath math="B" /> (או שניהם).
+                <strong>איחוד <InlineMath math="(A \cup B)" />:</strong> המאורע שבו מתרחש מאורע <InlineMath math="A" /> <strong>או</strong> מאורע <InlineMath math="B" /> (או שניהם).
               </p>
             </div>
           )
@@ -298,7 +309,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
               <p className="text-sm">
                 ההסתברות שיתרחש מאורע <InlineMath math="A" /> <strong>בהינתן (בתנאי)</strong> שמאורע <InlineMath math="B" /> כבר התרחש:
               </p>
-              <div className="p-3.5 bg-slate-105 dark:bg-slate-800/80 rounded-xl border border-transparent dark:border-slate-700/50 text-center shadow-inner">
+              <div className="p-3.5 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-transparent dark:border-slate-700/50 text-center shadow-inner">
                 <BlockMath math="P(A \mid B) = \frac{P(A \cap B)}{P(B)} \quad \text{for } P(B) > 0" />
               </div>
             </div>
@@ -418,6 +429,23 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
               <div className="p-3 bg-slate-100 dark:bg-slate-900/40 rounded-xl text-center font-sans">
                 <BlockMath math="Var(X) = \sigma^2 = \mathbb{E}\left[(X - \mu)^2\right] = \mathbb{E}[X^2] - (\mathbb{E}[X])^2" />
               </div>
+              
+              <div className="p-3.5 bg-indigo-50/40 dark:bg-indigo-950/15 rounded-xl border border-indigo-100/70 dark:border-indigo-900/30 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+                <div className="text-right flex-1">
+                  <span className="block text-xs font-black text-slate-800 dark:text-slate-200">S מול סמל סיגמא (<InlineMath math="\sigma" />): הבולבלת נגמרה עכשיו!</span>
+                  <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">
+                    האם מחלקים ב-<InlineMath math="n" /> או ב-<InlineMath math="n-1" />? הבן את ההבדל החשוב בשניית אחת עם מדריך ייעודי.
+                  </p>
+                </div>
+                <button 
+                  onClick={() => openHelper('sigma-vs-s')}
+                  className="w-full sm:w-auto px-3.5 py-1.5 bg-indigo-600 text-white hover:bg-indigo-700 text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm shadow-indigo-600/10 hover:shadow-md active:scale-95"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>הצג פיענוח ויזואלי</span>
+                </button>
+              </div>
+
               <div className="space-y-1 font-sans">
                 <span className="text-xs font-black text-slate-500 uppercase block mb-1">תכונות השונות וקבועים <InlineMath math="a, b, c" />:</span>
                 <ul className="list-disc pr-6 text-xs sm:text-sm space-y-1.5 text-slate-600 dark:text-slate-400">
@@ -558,7 +586,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
 
               {/* Binomial */}
               <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 shadow-sm animate-fade-in">
-                <h4 className="font-extrabold text-sm text-indigo-600 dark:text-indigo-400 mb-2 border-r-2 border-indigo-500 pr-2 text-right" dir="rtl">2. התפלגות בינומית (<InlineMath math="X \\sim Bin(n, p)" />)</h4>
+                <h4 className="font-extrabold text-sm text-indigo-600 dark:text-indigo-400 mb-2 border-r-2 border-indigo-500 pr-2 text-right" dir="rtl">2. התפלגות בינומית <InlineMath math="(X \\sim Bin(n, p))" /></h4>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
                   סופרת את מספר ההצלחות בתוך סידרה של <InlineMath math="n" /> ניסויי ברנולי בלתי תלויים עם סיכוי מוגדר <InlineMath math="p" /> להצלחה בכל שלב.
                 </p>
@@ -586,25 +614,25 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
             <div className="space-y-4">
               {/* Continuous Uniform */}
               <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 shadow-sm animate-fade-in">
-                <h4 className="font-extrabold text-sm text-indigo-600 dark:text-indigo-400 mb-2 border-r-2 border-indigo-500 pr-2 text-right" dir="rtl">1. התפלגות אחידה רציפה (<InlineMath math="X \\sim U(a, b)" />)</h4>
+                <h4 className="font-extrabold text-sm text-indigo-600 dark:text-indigo-400 mb-2 border-r-2 border-indigo-500 pr-2 text-right" dir="rtl">1. התפלגות אחידה רציפה <InlineMath math="(X \\sim U(a, b))" /></h4>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
                   כאשר המשתנה מרוח בצפיפות קבועה ואחידה מעל קטע יחיד ומוגדר <InlineMath math="[a, b]" />.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-center text-xs">
                   <div className="p-2 bg-slate-50 dark:bg-slate-900 rounded-lg">
-                    <span className="block text-slate-450 dark:text-slate-400 text-[10px] mb-1">צפיפות <InlineMath math="f(x)" /> בתוך</span>
+                    <span className="block text-slate-500 dark:text-slate-400 text-[10px] mb-1">צפיפות <InlineMath math="f(x)" /> בתוך</span>
                     <InlineMath math="\frac{1}{b - a}" />
                   </div>
                   <div className="p-2 bg-slate-50 dark:bg-slate-900 rounded-lg">
-                    <span className="block text-slate-450 dark:text-slate-400 text-[10px] mb-1">מצטברת <InlineMath math="F(x)" /></span>
+                    <span className="block text-slate-500 dark:text-slate-400 text-[10px] mb-1">מצטברת <InlineMath math="F(x)" /></span>
                     <InlineMath math="\frac{x-a}{b-a}" />
                   </div>
                   <div className="p-2 bg-slate-50 dark:bg-slate-900 rounded-lg">
-                    <span className="block text-slate-455 dark:text-slate-400 text-[10px] mb-1">תוחלת</span>
+                    <span className="block text-slate-500 dark:text-slate-400 text-[10px] mb-1">תוחלת</span>
                     <InlineMath math="\frac{a+b}{2}" />
                   </div>
                   <div className="p-2 bg-slate-50 dark:bg-slate-900 rounded-lg">
-                    <span className="block text-slate-455 dark:text-slate-400 text-[10px] mb-1">שונות</span>
+                    <span className="block text-slate-500 dark:text-slate-400 text-[10px] mb-1">שונות</span>
                     <InlineMath math="\frac{(b-a)^2}{12}" />
                   </div>
                 </div>
@@ -612,7 +640,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
 
               {/* Normal Distribution */}
               <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 shadow-sm animate-fade-in">
-                <h4 className="font-extrabold text-sm text-indigo-600 dark:text-indigo-400 mb-2 border-r-2 border-indigo-500 pr-2 text-right" dir="rtl">2. התפלגות נורמלית (<InlineMath math="X \\sim N(\\mu, \\sigma^2)" />)</h4>
+                <h4 className="font-extrabold text-sm text-indigo-600 dark:text-indigo-400 mb-2 border-r-2 border-indigo-500 pr-2 text-right" dir="rtl">2. התפלגות נורמלית <InlineMath math="(X \\sim N(\\mu, \\sigma^2))" /></h4>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
                   ההתפלגות המרכזית במחקר. סימטרית לחלוטין סביב התוחלת (צורת פעמון גאוס).
                 </p>
@@ -660,7 +688,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 bg-slate-50 dark:bg-slate-800/65 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-sm">
-                  <h4 className="font-extrabold text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 mb-2 border-r-2 border-indigo-500 pr-2 text-right" dir="rtl">עבור ממוצע המדגם (<InlineMath math="\overline{X}" />)</h4>
+                  <h4 className="font-extrabold text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 mb-2 border-r-2 border-indigo-500 pr-2 text-right" dir="rtl">עבור ממוצע המדגם <InlineMath math="(\\overline{X})" /></h4>
                   <p className="text-xs text-slate-500 dark:text-slate-350 leading-relaxed mb-3">
                     הצטמצמות תנודת שגיאת הממוצע:
                   </p>
@@ -673,7 +701,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
                 </div>
 
                 <div className="p-4 bg-slate-50 dark:bg-slate-800/65 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-sm">
-                  <h4 className="font-extrabold text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 mb-2 border-r-2 border-indigo-500 pr-2 text-right" dir="rtl">עבור סכום המדגם (<InlineMath math="S_n = \sum X_i" />)</h4>
+                  <h4 className="font-extrabold text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 mb-2 border-r-2 border-indigo-500 pr-2 text-right" dir="rtl">עבור סכום המדגם <InlineMath math="(S_n = \\sum X_i)" /></h4>
                   <p className="text-xs text-slate-500 dark:text-slate-350 leading-relaxed mb-3">
                     התפשטות ואיסוף סך הסכום:
                   </p>
@@ -767,7 +795,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
           )
         },
         {
-          title: 'מקדם מתאם של פירסון ($\rho$)',
+          title: 'מקדם מתאם של פירסון (ρ)',
           content: (
             <div className="space-y-4">
               <p className="text-sm">
@@ -838,9 +866,9 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
               <div className="p-3.5 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm rounded-xl leading-relaxed">
                 <strong>אחוזונים ורבעונים:</strong> מחלקים את הנתונים הממוינים למאה/ארבעה חלקים שווים.
                 <ul className="list-disc pr-5 mt-2 text-xs text-slate-600 dark:text-slate-300 space-y-1">
-                  <li><strong>רבעון ראשון (<InlineMath math="Q_1" />):</strong> אחוזון ה-25% של הדגימות.</li>
-                  <li><strong>רבעון שני (<InlineMath math="Q_2" /> / חציון):</strong> אחוזון ה-50%.</li>
-                  <li><strong>רבעון שלישי (<InlineMath math="Q_3" />):</strong> אחוזון ה-75% של הדגימות.</li>
+                  <li><strong>רבעון ראשון <InlineMath math="(Q_1)" />:</strong> אחוזון ה-25% של הדגימות.</li>
+                  <li><strong>רבעון שני <InlineMath math="(Q_2)" /> / חציון:</strong> אחוזון ה-50%.</li>
+                  <li><strong>רבעון שלישי <InlineMath math="(Q_3)" />:</strong> אחוזון ה-75% של הדגימות.</li>
                 </ul>
               </div>
 
@@ -880,7 +908,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
                 <div className="p-3.5 rounded-xl border border-indigo-200/50 dark:border-slate-800 bg-white dark:bg-slate-900">
                   <h5 className="font-extrabold text-slate-800 dark:text-slate-100 mb-2">אסימטריה חיובית (ימנית)</h5>
                   <p className="text-slate-500 mb-2 text-[11px]">זנב שרוע לצד ימין, קיצוני חלש בכיוון החיובי:</p>
-                  <span className="font-bold text-amber-600 dark:text-amber-450 font-mono">ממוצע &gt; חציון &gt; שכיח</span>
+                  <span className="font-bold text-amber-600 dark:text-amber-400 font-mono">ממוצע &gt; חציון &gt; שכיח</span>
                 </div>
 
                 <div className="p-3.5 rounded-xl border border-indigo-200/50 dark:border-slate-800 bg-white dark:bg-slate-900">
@@ -904,19 +932,19 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
           content: (
             <div className="space-y-3">
               <p className="text-sm leading-relaxed">
-                אמידה נקודתית משמשת כדי לשער פרמטר כלשהו באוכלוסייה (<InlineMath math="\theta" />) על בסיס מספר יחיד המחושב מהמדגם ונקרא אומד (<InlineMath math="\hat{\theta}" />).
+                אמידה נקודתית משמשת כדי לשער פרמטר כלשהו באוכלוסייה <InlineMath math="(\theta)" /> על בסיס מספר יחיד המחושב מהמדגם ונקרא אומד <InlineMath math="(\hat{\theta})" />.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-center text-xs">
                 <div className="p-3 bg-slate-100/50 dark:bg-slate-900/40 rounded-xl">
-                  <span className="block text-slate-400 mb-1">אומד לתוחלת (<InlineMath math="\mu" />):</span>
+                  <span className="block text-slate-400 mb-1">אומד לתוחלת <InlineMath math="(\mu)" />:</span>
                   <InlineMath math="\hat{\mu} = \overline{X}" />
                 </div>
                 <div className="p-3 bg-slate-100/50 dark:bg-slate-900/40 rounded-xl">
-                  <span className="block text-slate-400 mb-1">אומד לשונות (<InlineMath math="\sigma^2" />):</span>
+                  <span className="block text-slate-400 mb-1">אומד לשונות <InlineMath math="(\sigma^2)" />:</span>
                   <InlineMath math="\hat{\sigma}^2 = S^2" />
                 </div>
                 <div className="p-3 bg-slate-100/50 dark:bg-slate-900/40 rounded-xl">
-                  <span className="block text-slate-400 mb-1">אומד לפרופורציה (<InlineMath math="p" />):</span>
+                  <span className="block text-slate-400 mb-1">אומד לפרופורציה <InlineMath math="(p)" />:</span>
                   <InlineMath math="\hat{p} = \frac{x}{n}" />
                 </div>
               </div>
@@ -957,14 +985,14 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-center text-xs">
                 <div className="p-3 bg-slate-100/50 dark:bg-slate-900/40 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
-                  <span className="block text-slate-400 mb-1.5">עבור ממוצע (<InlineMath math="\sigma" /> ידועה)</span>
+                  <span className="block text-slate-400 mb-1.5">עבור ממוצע <InlineMath math="(\sigma)" /> ידועה</span>
                   <div className="bg-white dark:bg-slate-950 p-2 rounded border border-slate-100 dark:border-slate-800 font-mono">
                     <InlineMath math="SE = \sigma_{\overline{X}} = \frac{\sigma}{\sqrt{n}}" />
                   </div>
                 </div>
 
                 <div className="p-3 bg-slate-100/50 dark:bg-slate-900/40 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
-                  <span className="block text-slate-400 mb-1.5">עבור ממוצע (<InlineMath math="\sigma" /> לא ידועה)</span>
+                  <span className="block text-slate-400 mb-1.5">עבור ממוצע <InlineMath math="(\sigma)" /> לא ידועה</span>
                   <div className="bg-white dark:bg-slate-950 p-2 rounded border border-slate-100 dark:border-slate-800 font-mono">
                     <InlineMath math="SE = S_{\overline{X}} = \frac{S}{\sqrt{n}}" />
                   </div>
@@ -976,6 +1004,24 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
                     <InlineMath math="SE = \sigma_{\hat{p}} = \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}" />
                   </div>
                 </div>
+              </div>
+
+              <div className="p-3.5 bg-emerald-50/40 dark:bg-emerald-950/15 rounded-xl border border-emerald-100/70 dark:border-emerald-900/30 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+                <div className="text-right flex-1">
+                  <span className="block text-xs font-black text-emerald-800 dark:text-emerald-300">למה מחלקים בשורש של n? (איך השורש הגיע למכנה?)</span>
+                  <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">
+                    האם אתה רוצה להבין את ההוכחה המתמטית הפשוטה כיצד השונות הדו-מימדית יורדת לחד-מימד כשורש n?
+                  </p>
+                </div>
+                <button 
+                  onClick={() => {
+                    openHelper('standard-error');
+                  }}
+                  className="w-full sm:w-auto px-3.5 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm shadow-emerald-600/10 hover:shadow-md active:scale-95"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>הסבר לי את חוקיות השורש</span>
+                </button>
               </div>
             </div>
           )
@@ -991,7 +1037,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
                 <BlockMath math="\overline{X} \pm Z_{1 - \alpha/2} \cdot \frac{\sigma}{\sqrt{n}}" />
               </div>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-                <strong>אורך רווח הסמך (<InlineMath math="L" />):</strong> שווה למרחק שבין שני הגבולות, כלומר פעמיים מרחק השגיאה:
+                <strong>אורך רווח הסמך <InlineMath math="(L)" />:</strong> שווה למרחק שבין שני הגבולות, כלומר פעמיים מרחק השגיאה:
               </p>
               <div className="p-2.5 bg-slate-50 dark:bg-slate-950 text-center font-mono rounded">
                 <InlineMath math="L = 2 \cdot Z_{1 - \alpha/2} \cdot \frac{\sigma}{\sqrt{n}}" />
@@ -1004,13 +1050,13 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
           content: (
             <div className="space-y-3">
               <p className="text-sm">
-                במציאות סטיית התקן <InlineMath math="\sigma" /> כמעט תמיד אינה ידועה במלואה. לכן משתמשים בסטיית המדגם המתוקנת <InlineMath math="S" /> ובהתפלגות <InlineMath math="T" /> בעלת <InlineMath math="n-1" /> דרגות חופש (<InlineMath math="df" />):
+                במציאות סטיית התקן <InlineMath math="\sigma" /> כמעט תמיד אינה ידועה במלואה. לכן משתמשים בסטיית המדגם המתוקנת <InlineMath math="S" /> ובהתפלגות <InlineMath math="T" /> בעלת <InlineMath math="n-1" /> דרגות חופש <InlineMath math="(df)" />:
               </p>
               <div className="p-3.5 bg-slate-100/50 dark:bg-slate-900/40 rounded-xl text-center">
                 <BlockMath math="\overline{X} \pm T_{1 - \alpha/2, \; n-1} \cdot \frac{S}{\sqrt{n}}" />
               </div>
               <p className="text-xs text-rose-500 font-extrabold border-r-2 border-rose-500 pr-2">
-                שימו לב: מכיוון שהתפלגות $T$ היא בעלת זנבות עבים יותר מהתפלגות נורמלית, רווחי הסמך בשימוש ב-<InlineMath math="T" /> יהיו בהכרח רחבים וארוכים יותר מאשר ב-<InlineMath math="Z" /> לאותו מדגם, כדי לפצות על אי-הוודאות שבשונות.
+                שימו לב: מכיוון שהתפלגות <InlineMath math="T" /> היא בעלת זנבות עבים יותר מהתפלגות נורמלית, רווחי הסמך בשימוש ב-<InlineMath math="T" /> יהיו בהכרח רחבים וארוכים יותר מאשר ב-<InlineMath math="Z" /> לאותו מדגם, כדי לפצות על אי-הוודאות שבשונות.
               </p>
             </div>
           )
@@ -1027,7 +1073,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
           content: (
             <div className="space-y-4">
               <p className="text-sm">
-                מגדירים את השערת האפס הזקופה לאי-שינוי (<InlineMath math="H_0" />) מול טענת הגילוי המחקרית האלטרנטיבית (<InlineMath math="H_1" />).
+                מגדירים את השערת האפס הזקופה לאי-שינוי <InlineMath math="(H_0)" /> מול טענת הגילוי המחקרית האלטרנטיבית <InlineMath math="(H_1)" />.
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -1059,7 +1105,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
           )
         },
         {
-          title: 'שלב ב\': קביעת רמת המובהקות ($\alpha$) וסוגי הטעויות',
+          title: 'שלב ב\': קביעת רמת המובהקות (α) וסוגי הטעויות',
           content: (
             <div className="space-y-4">
               <p className="text-sm">
@@ -1068,7 +1114,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
                 <div className="p-4 rounded-xl border border-red-100 bg-red-50/10 dark:border-red-900/40 dark:bg-rose-950/5">
-                  <strong className="text-red-700 dark:text-red-400 block mb-1">טעות מסוג ראשון ($\alpha$):</strong>
+                  <strong className="text-red-700 dark:text-red-400 block mb-1">טעות מסוג ראשון (<InlineMath math="\alpha" />):</strong>
                   דחייה מוטעית של השערת האפס כשהיא נכונה.
                   <div className="mt-2 text-center p-1 bg-white dark:bg-slate-950 font-mono rounded text-xs">
                     <InlineMath math="\alpha = P(\text{Reject } H_0 \mid H_0 \text{ is true})" />
@@ -1076,7 +1122,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
                 </div>
 
                 <div className="p-4 rounded-xl border border-amber-100 bg-amber-50/10 dark:border-amber-900/40 dark:bg-amber-950/5">
-                  <strong className="text-amber-700 dark:text-amber-400 block mb-1">טעות מסוג שני (<InlineMath math="\beta" />):</strong>
+                  <strong className="text-amber-700 dark:text-amber-400 block mb-1">טעות מסוג שני <InlineMath math="(\beta)" />:</strong>
                   אי-דחיית השערה שקרית כשהאלטרנטיבית נכונה.
                   <div className="mt-2 text-center p-1 bg-white dark:bg-slate-950 font-mono rounded text-xs font-bold">
                     <InlineMath math="\beta = P(\text{Fail to reject } H_0 \mid H_1 \text{ is true})" />
@@ -1096,7 +1142,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
           content: (
             <div className="space-y-3">
               <p className="text-sm leading-relaxed">
-                סטטיסטי המבחן מודד פער יחסי בין הערך המדגמי הנמדד בפועל לבין הערך הצפוי תחת הנחת תקינותה של השערת האפס (<InlineMath math="H_0" />), המנורמל על פי שגיאת התקן של האומדן:
+                סטטיסטי המבחן מודד פער יחסי בין הערך המדגמי הנמדד בפועל לבין הערך הצפוי תחת הנחת תקינותה של השערת האפס <InlineMath math="(H_0)" />, המנורמל על פי שגיאת התקן של האומדן:
               </p>
               
               <div className="p-3.5 bg-slate-100/50 dark:bg-slate-900/40 rounded-xl text-center">
@@ -1106,8 +1152,8 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
               <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl text-xs space-y-2">
                 <strong className="block text-slate-800 dark:text-slate-100">מגוון הסטטיסטיים השכיחים:</strong>
                 <ul className="list-disc pr-5 leading-relaxed text-slate-600 dark:text-slate-300 space-y-1.5">
-                  <li><strong>Z-Statistic:</strong> לתוחלת עם שונות תחת הכלל המרכזי (<InlineMath math="\sigma" /> ידועה).</li>
-                  <li><strong>T-Statistic למדגם יחיד:</strong> לתוחלת במצרפת מדגם ממוצע קטן (<InlineMath math="\sigma" /> לא ידועה, <InlineMath math="df = n-1" />).</li>
+                  <li><strong>Z-Statistic:</strong> לתוחלת עם שונות תחת הכלל המרכזי <InlineMath math="(\sigma \text{ ידועה})" />.</li>
+                  <li><strong>T-Statistic למדגם יחיד:</strong> לתוחלת במצרפת מדגם ממוצע קטן <InlineMath math="(\sigma \text{ לא ידועה}, \; df = n-1)" />.</li>
                   <li><strong>T-Statistic לשני מדגמים בלתי-תלויים:</strong> בחינת הבדלי תוחלות עם שימוש בשונות מקובצת:
                     <br />
                     <InlineMath math="S_p^2 = \frac{(n_1-1)S_1^2 + (n_2-1)S_2^2}{n_1+n_2-2}" /> וכן <InlineMath math="t_{calc} = \frac{(\overline{X}_1 - \overline{X}_2) - 0}{\sqrt{S_p^2(1/n_1 + 1/n_2)}}" />.
@@ -1131,8 +1177,8 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
                   <strong className="block text-indigo-700 dark:text-indigo-400">1. שיטת ערך קריטי (Critical Value):</strong>
                   נחפש בטבלאות ערך קריטי בהתאם ל-<InlineMath math="\alpha" /> ודרגות החופש.
                   <ul className="list-disc pr-5 mt-1 text-xs text-slate-600 dark:text-slate-400 space-y-1">
-                    <li>חד-צדדי ימני (<InlineMath math="Z" />): נדחות אם <InlineMath math="Z_{calc} > Z_{1-\alpha}" />.</li>
-                    <li>דו-צדדי (<InlineMath math="Z" />): נדחות אם <InlineMath math="|Z_{calc}| > Z_{1-\alpha/2}" />.</li>
+                    <li>חד-צדדי ימני <InlineMath math="(Z)" />: נדחות אם <InlineMath math="Z_{calc} > Z_{1-\alpha}" />.</li>
+                    <li>דו-צדדי <InlineMath math="(Z)" />: נדחות אם <InlineMath math="|Z_{calc}| > Z_{1-\alpha/2}" />.</li>
                   </ul>
                 </div>
 
@@ -1156,7 +1202,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
               </p>
               <div className="p-4 bg-slate-100/50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 font-semibold text-slate-700 dark:text-slate-300">
                 "ברמת מובהקות של <InlineMath math="\alpha = X\%" />, סטטיסטי המבחן שחושב פוסל / אינו פוסל את גבול הסף של אזור הדחייה (או שכלל ה-P-Value הניב ערך הקטן / גדול מרמת המובהקות), 
-                לכן <strong>נדחית / אינה נדחית</strong> השערת האפס (<InlineMath math="H_0" />).
+                לכן <strong>נדחית / אינה נדחית</strong> השערת האפס <InlineMath math="(H_0)" />.
                 <br />
                 בהתאמה לכך, קיים / לא קיים אישוש סטטיסטי המעיד כי [הסבר הטענה במונחי הבעיה האקדמית המקורית]".
               </div>
@@ -1242,7 +1288,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
                     onClick={() => handleScrollTo(section.id as any)}
                     className={`w-full text-right py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-between gap-1.5 group ${
                       isSelected
-                        ? 'bg-blue-600/10 text-blue-600 dark:text-blue-400 border-r-4 border-blue-550'
+                        ? 'bg-blue-600/10 text-blue-600 dark:text-blue-400 border-r-4 border-blue-500'
                         : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200'
                     }`}
                   >
@@ -1356,7 +1402,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
                         key={topicKey}
                         className={`rounded-xl border transition-all ${
                           isExpanded
-                            ? (theme === 'dark' ? 'bg-slate-950/40 border-slate-800/80 ring-2 ring-blue-500/5' : 'bg-slate-50/45 border-slate-205 ring-2 ring-blue-500/5')
+                            ? (theme === 'dark' ? 'bg-slate-950/40 border-slate-800/80 ring-2 ring-blue-500/5' : 'bg-slate-50/45 border-slate-200 ring-2 ring-blue-500/5')
                             : (theme === 'dark' ? 'border-slate-800 hover:border-slate-700 bg-slate-900/30' : 'border-slate-200 hover:border-slate-300 bg-white')
                         }`}
                       >
@@ -1432,7 +1478,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
                         </div>
                         <div className="p-2 bg-white dark:bg-slate-950 rounded border border-slate-100 dark:border-slate-800">
                           <span className="block text-[9px] text-slate-400 font-bold">טווח בין-רבעוני (IQR)</span>
-                          <span className="font-mono font-black text-xs text-indigo-605 dark:text-indigo-400">{computedStats.iqr}</span>
+                          <span className="font-mono font-black text-xs text-indigo-600 dark:text-indigo-400">{computedStats.iqr}</span>
                         </div>
                         <div className="p-2 bg-white dark:bg-slate-950 rounded border border-slate-100 dark:border-slate-800">
                           <span className="block text-[9px] text-slate-400 font-bold">שונות המדגם (S²)</span>
@@ -1449,6 +1495,15 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
         </div>
       </div>
 
+      <AnimatePresence>
+        {helperModalOpen && (
+          <StatisticalHelperModal 
+            isOpen={helperModalOpen}
+            onClose={() => setHelperModalOpen(false)}
+            initialTab={helperModalTab}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -370,11 +370,11 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
       <div className={`rounded-3xl border p-6 md:p-8 text-right relative overflow-hidden shadow-lg transition-all ${
         theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-300'
       }`}>
-        <div className="absolute top-0 right-0 w-full h-2 bg-gradient-to-l from-red-650 via-indigo-700 to-emerald-600" />
+        <div className="absolute top-0 right-0 w-full h-2 bg-gradient-to-l from-red-600 via-indigo-700 to-emerald-600" />
         
-        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-105 dark:border-slate-800 pb-5">
+        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
           <div>
-            <span className="text-indigo-650 dark:text-indigo-400 text-xs sm:text-sm font-black uppercase tracking-wider mb-2 flex items-center gap-2">
+            <span className="text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm font-black uppercase tracking-wider mb-2 flex items-center gap-2">
               <Award size={16} />
               <span>מבחני מובהקות וניתוח עוצמה סטטיסטית (Power Analysis)</span>
             </span>
@@ -391,7 +391,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
           <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-950/25">
             <table className="w-full text-sm text-right border-collapse">
               <thead>
-                <tr className="bg-slate-100/70 dark:bg-slate-805/70 text-xs text-slate-850 dark:text-slate-250 font-extrabold border-b border-slate-200 dark:border-slate-800">
+                <tr className="bg-slate-100/70 dark:bg-slate-800/70 text-xs text-slate-800 dark:text-slate-300 font-extrabold border-b border-slate-200 dark:border-slate-800">
                   <th className="p-4 border-l border-slate-200 dark:border-slate-800 text-center font-black text-slate-900 dark:text-slate-100 bg-slate-200/30 dark:bg-slate-800/25 w-1/4">החלטת המבחן</th>
                   <th className="p-4 border-l border-slate-200 dark:border-slate-800 text-center font-black bg-blue-50/40 dark:bg-blue-900/10">H₀ נכונה במציאות (אין אפקט)</th>
                   <th className="p-4 text-center font-black bg-amber-50/30 dark:bg-amber-900/10">H₁ נכונה במציאות (קיים אפקט)</th>
@@ -456,7 +456,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                       </span>
                       <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 font-mono" dir="ltr">α (Alpha)</span>
                     </div>
-                    <div className="text-2xl sm:text-3xl font-black mt-2 text-red-750 dark:text-red-300 font-mono">
+                    <div className="text-2xl sm:text-3xl font-black mt-2 text-red-700 dark:text-red-300 font-mono">
                       {(alpha * 100).toFixed(1)}%
                     </div>
                     <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
@@ -467,13 +467,13 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                   {/* Cell 2-2: Reject H0 and H1 is true => Correct decision Power! */}
                   <td className="p-4 sm:p-5 bg-gradient-to-br from-indigo-50/30 to-emerald-50/30 dark:from-indigo-950/10 dark:to-emerald-950/10 hover:from-indigo-50/45 hover:to-emerald-50/45 dark:hover:from-indigo-950/15 dark:hover:to-emerald-950/15 transition-all">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-extrabold text-indigo-750 dark:text-indigo-300 flex items-center gap-1.5 text-xs sm:text-sm">
-                        <CheckCircle size={15} className="text-indigo-600 dark:text-indigo-400" />
+                      <span className="font-extrabold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5 text-xs sm:text-sm">
+                        <CheckCircle size={15} className="text-indigo-600 dark:text-indigo-405" />
                         החלטה נכונה (עוצמה)
                       </span>
                       <span className="text-xs font-bold text-slate-500 dark:text-slate-400 font-mono" dir="ltr">1 - β (Power)</span>
                     </div>
-                    <div className="text-2xl sm:text-3xl font-black mt-2 text-indigo-700 dark:text-indigo-450 tracking-tight font-mono">
+                    <div className="text-2xl sm:text-3xl font-black mt-2 text-indigo-700 dark:text-indigo-400 tracking-tight font-mono">
                       {(stats.power * 100).toFixed(2)}%
                     </div>
                     <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
@@ -537,7 +537,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                     {(stats.power * 100).toFixed(2)}%
                   </div>
                 </div>
-                <span className="text-[10px] sm:text-xs text-slate-105 font-bold block mt-2 leading-tight">הסיכוי לדחות נכון את H₀</span>
+                <span className="text-[10px] sm:text-xs text-indigo-100 font-bold block mt-2 leading-tight">הסיכוי לדחות נכון את H₀</span>
               </div>
 
               <div className={`p-4 sm:p-5 rounded-2xl border text-right shadow-md transition-all ${
@@ -659,11 +659,11 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                       height={40} 
                       content={() => (
                         <div className="flex justify-center gap-8 text-xs sm:text-sm md:text-base py-2">
-                          <span className="text-slate-905 dark:text-slate-100 font-black flex items-center gap-2 select-none">
+                          <span className="text-slate-900 dark:text-slate-100 font-black flex items-center gap-2 select-none">
                             <span className="w-3.5 h-1.5 inline-block bg-blue-500 rounded" />
                             H₀: מיקום המרכז = {stats.effectH0Mean.toFixed(2)}
                           </span>
-                          <span className="text-slate-905 dark:text-slate-100 font-black flex items-center gap-2 select-none">
+                          <span className="text-slate-900 dark:text-slate-100 font-black flex items-center gap-2 select-none">
                             <span className="w-3.5 h-1.5 inline-block bg-amber-500 rounded" />
                             H₁: מיקום המרכז = {stats.effectH1Mean.toFixed(2)}
                           </span>
@@ -1016,7 +1016,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                   }`}
                   placeholder="לדוגמה: 100"
                 />
-                {errors.mu0 && <p className="text-xs sm:text-sm text-red-650 dark:text-red-400 font-bold mt-1">{errors.mu0}</p>}
+                {errors.mu0 && <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 font-bold mt-1">{errors.mu0}</p>}
               </div>
                         {/* Mean H1 alternative input */}
               <div className="space-y-1">
