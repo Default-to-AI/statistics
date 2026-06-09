@@ -633,7 +633,8 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
   const [searchType, setSearchType] = useState<'z' | 'phi'>('z');
   const [searchVal, setSearchVal] = useState<string>(activeZ?.toFixed(2) || '');
   const [phiSearchVal, setPhiSearchVal] = useState<string>('');
-  const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
+  const [isZGuideOpen, setIsZGuideOpen] = useState<boolean>(false);
+  const [isTGuideOpen, setIsTGuideOpen] = useState<boolean>(false);
 
   // Student's T-distribution states
   const [tDf, setTDf] = useState<number>(10);
@@ -647,7 +648,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
     }
   }, [activeZ]);
 
-  const rows = useMemo(() => Array.from({ length: 36 }, (_, i) => i / 10), []);
+  const rows = useMemo(() => Array.from({ length: 40 }, (_, i) => i / 10), []);
   const cols = useMemo(() => Array.from({ length: 10 }, (_, i) => i / 100), []);
 
   const dfList = useMemo(() => [
@@ -703,6 +704,28 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
   const rowVal = lookupZ !== null ? Math.floor(lookupZ * 10) / 10 : null;
   const colVal = lookupZ !== null ? Math.round((lookupZ - rowVal!) * 100) / 100 : null;
 
+  const activeCellRef = useRef<HTMLTableCellElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (activeCellRef.current && containerRef.current) {
+      const cell = activeCellRef.current;
+      const container = containerRef.current;
+      
+      const cellRect = cell.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      
+      const scrollTop = container.scrollTop + (cellRect.top - containerRect.top) - (containerRect.height / 2) + (cellRect.height / 2);
+      const scrollLeft = container.scrollLeft + (cellRect.left - containerRect.left) - (containerRect.width / 2) + (cellRect.width / 2);
+      
+      container.scrollTo({
+        top: scrollTop,
+        left: scrollLeft,
+        behavior: 'smooth'
+      });
+    }
+  }, [rowVal, colVal]);
+
   const computedTCritical = useMemo(() => {
     if (tDf <= 0 || isNaN(tDf)) return null;
     const targetP = tSide === 'two' ? 1 - (tAlpha / 2) : 1 - tAlpha;
@@ -711,7 +734,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
   }, [tDf, tAlpha, tSide]);
 
   const renderTableSection = (tableRows: number[]) => (
-    <div className="overflow-auto rounded-xl border border-slate-200 dark:border-slate-800 max-h-[480px]">
+    <div ref={containerRef} className="overflow-auto rounded-xl border border-slate-200 dark:border-slate-800 max-h-[480px]">
       <table className="w-full text-xs sm:text-sm border-collapse">
         <thead>
           <tr className="bg-slate-100 dark:bg-slate-800">
@@ -758,6 +781,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
                   return (
                     <td 
                       key={c} 
+                      ref={isActive ? activeCellRef : undefined}
                       className={`p-2.5 border border-slate-200 dark:border-slate-700 text-center transition-all duration-300 tabular-nums ${
                         isActive 
                           ? 'bg-blue-600 text-white dark:bg-blue-500 font-extrabold scale-102 shadow-lg z-10 relative rounded-md' 
@@ -861,178 +885,428 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
     <div className={`overflow-hidden border rounded-2xl shadow-xl transition-all ${
       theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
     } ${!showSearch ? 'mt-4' : ''}`}>
-      {/* Educational Header - Interactive Collapsible Accordion */}
-      <button 
-        type="button"
-        onClick={() => setIsGuideOpen(!isGuideOpen)}
-        className="w-full text-right p-5 bg-gradient-to-br from-slate-800 to-slate-950 text-white flex items-center justify-between hover:from-slate-700 hover:to-slate-900 transition-all cursor-pointer border-b border-white/5 active:scale-[0.99]"
-      >
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
-            <BookOpen size={18} className="text-white" />
-          </div>
-          <div>
-            <h3 className="text-base sm:text-lg font-black tracking-tight flex items-center gap-2">
-              מדריכי קריאה מהירים לטבלאות Z ו-T
-            </h3>
-            <p className="text-xs text-slate-350 mt-0.5 font-bold">
-              {isGuideOpen ? 'לחץ לכיווץ והסתרת ההנחיות' : 'לחץ להצגת הסברים לקריאת טבלת נורמלית (Z) וטבלת Student-t'}
-            </p>
-          </div>
-        </div>
-        <div className="p-1.5 rounded-lg bg-white/10 text-blue-400">
-          <ChevronDown 
-            size={18} 
-            className={`transition-transform duration-300 ${isGuideOpen ? 'rotate-180' : ''}`} 
-          />
-        </div>
-      </button>
       
-      <AnimatePresence initial={false}>
-        {isGuideOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="overflow-hidden bg-slate-950/45 border-b border-slate-800"
-          >
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-right">
-              <div className="space-y-3 p-4 bg-white/5 rounded-xl border border-white/10">
-                <div className="flex items-center gap-2 text-blue-400 font-bold">
-                  <div className="w-2.5 h-2.5 rounded-full bg-blue-400" />
-                  איך קוראים את טבלת Z?
-                </div>
-                <p className="text-sm text-slate-300 leading-relaxed font-semibold">
-                  ערך ה-Z מופיע <strong>בשולי הטבלה</strong> (אנכית השורה עם השלם והעשירית, ואופקית העמודה עם המאית). 
-                  ערך ה-PHI (ההסתברות המצטברת משמאל) מופיע <strong>בתוך תאי הטבלה</strong>.
-                </p>
-                <div className="text-xs bg-blue-500/15 p-2 rounded-lg border border-blue-500/20 text-blue-200" dir="rtl">
-                  דוגמה: למציאת <InlineMath math="Z=1.96" />, נצליב שורה 1.9 ועמודה 0.06 כדי לקבל <InlineMath math="0.9750" />.
-                </div>
-              </div>
-              
-              <div className="space-y-3 p-4 bg-white/5 rounded-xl border border-white/10">
-                <div className="flex items-center gap-2 text-indigo-400 font-bold">
-                  <div className="w-2.5 h-2.5 rounded-full bg-indigo-400" />
-                  איך קוראים את טבלת T?
-                </div>
-                <p className="text-sm text-slate-300 leading-relaxed font-semibold">
-                  דרגות החופש (df) מופיעות <strong>בשורה האנכית הימנית</strong>, ואילו רמות המובהקות (<InlineMath math="\alpha" /> חד-צדדי או דו-צדדי) מופיעות <strong>בראש העמודות</strong>. 
-                  מפגש השורה והעמודה נותן את ערך ה-T הפיזי הקריטי המבוקש.
-                </p>
-                <div className="text-xs bg-indigo-500/15 p-2 rounded-lg border border-indigo-500/20 text-indigo-700 dark:text-indigo-300" dir="rtl">
-                  דוגמה: עבור <InlineMath math="df = 10" /> ובדיקה דו-צדדית עם <InlineMath math="\alpha = 0.05" />, נקבל ערך קריטי של <InlineMath math="t = 2.2281" />.
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <div className="p-6 space-y-10" dir="rtl">
         {/* SECTION 1: CONSOLIDATED Z-TABLE */}
         <div className="space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-3 border-slate-100 dark:border-slate-800">
+          <div className="flex flex-col gap-3 border-b pb-3 border-slate-100 dark:border-slate-800">
             <div>
               <h3 className="text-base sm:text-lg font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
                 טבלת Z מלאה (התפלגות נורמלית סטנדרטית)
               </h3>
-              <p className="text-xs text-slate-400 mt-1">טבלה אחת אחודה של סימטריה חיובית, המקיפה את שטחי ההסתברות המצטברת משמאל לערך ה-Z</p>
             </div>
             
-            <div className="flex flex-wrap items-center gap-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-2 rounded-xl">
-              <div className="flex p-0.5 rounded-lg border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-inner">
-                <button
-                  type="button"
-                  onClick={() => setSearchType('z')}
-                  className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all ${
-                    searchType === 'z' 
-                      ? 'bg-blue-600 text-white shadow-md' 
-                      : 'text-slate-500 dark:text-slate-400'
-                  }`}
+            <div className="flex flex-wrap items-center gap-2.5">
+              <div 
+                style={{ width: '412px', fontSize: '15.6px' }}
+                className="flex flex-wrap items-center gap-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1.5 px-2 rounded-xl text-xs max-w-full shrink-0 shadow-sm"
+              >
+                <div 
+                  style={{ width: '108.236px' }}
+                  className="flex p-0.5 rounded-lg border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-inner"
                 >
-                  לפי Z
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSearchType('phi')}
-                  className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all ${
-                    searchType === 'phi' 
-                      ? 'bg-blue-600 text-white shadow-md' 
-                      : 'text-slate-500 dark:text-slate-400'
-                  }`}
-                >
-                  לפי PHI
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    onClick={() => setSearchType('z')}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                      searchType === 'z' 
+                        ? 'bg-blue-600 text-white shadow-md' 
+                        : 'text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    לפי Z
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSearchType('phi')}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                      searchType === 'phi' 
+                        ? 'bg-blue-600 text-white shadow-md' 
+                        : 'text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    לפי PHI
+                  </button>
+                </div>
 
-              <div className="flex items-center gap-1.5 px-2">
-                <label className="text-[11px] font-black text-slate-450">
-                  {searchType === 'z' ? 'ערך לזיהוי:' : 'PHI לזיהוי:'}
-                </label>
-                {searchType === 'z' ? (
-                  <input 
-                    type="number" 
-                    step="0.01"
-                    min="0"
-                    max="3.99"
-                    value={searchVal}
-                    onChange={(e) => setSearchVal(e.target.value)}
-                    placeholder="1.96"
-                    className="w-16 text-xs font-black outline-none bg-transparent text-blue-600 dark:text-blue-400 border-b border-slate-200 dark:border-slate-700 text-center"
-                  />
-                ) : (
-                  <input 
-                    type="number" 
-                    step="0.0001"
-                    min="0.5"
-                    max="0.9999"
-                    value={phiSearchVal}
-                    onChange={(e) => setPhiSearchVal(e.target.value)}
-                    placeholder="0.95"
-                    className="w-16 text-xs font-black outline-none bg-transparent text-emerald-600 dark:text-emerald-400 border-b border-slate-200 dark:border-slate-700 text-center"
-                  />
+                <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
+
+                <div className="flex items-center gap-1 text-slate-700 dark:text-slate-300">
+                  <span className="font-bold">
+                    {searchType === 'z' ? 'ערך Z:' : 'ערך PHI:'}
+                  </span>
+                  {searchType === 'z' ? (
+                    <input 
+                      type="number" 
+                      step="0.01"
+                      min="0"
+                      max="3.99"
+                      value={searchVal}
+                      onChange={(e) => setSearchVal(e.target.value)}
+                      placeholder="1.96"
+                      style={{ width: '95px' }}
+                      className="px-1 py-0.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded font-bold font-mono text-center text-blue-600 dark:text-blue-400 animate-none"
+                    />
+                  ) : (
+                    <input 
+                      type="number" 
+                      step="0.0001"
+                      min="0.5"
+                      max="0.9999"
+                      value={phiSearchVal}
+                      onChange={(e) => setPhiSearchVal(e.target.value)}
+                      placeholder="0.95"
+                      style={{ width: '95px' }}
+                      className="px-1 py-0.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded font-bold font-mono text-center text-emerald-600 dark:text-emerald-400 animate-none"
+                    />
+                  )}
+                </div>
+
+                {lookupZ !== null && (
+                  <>
+                    <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
+                    <div className="flex items-center gap-1 bg-blue-600 text-white font-extrabold px-2 py-0.5 rounded-lg select-all tabular-nums text-xs border border-blue-700 shadow-sm" dir="ltr">
+                      <span className="opacity-85 mr-1 text-[10px]">{searchType === 'z' ? 'Φ(z) =' : 'z_val ='}</span>
+                      <span>
+                        {searchType === 'z' 
+                          ? normalCDF(actualZ || lookupZ, 0, 1).toFixed(4)
+                          : lookupZ.toFixed(2)
+                        }
+                      </span>
+                    </div>
+                  </>
                 )}
               </div>
+
+              <button
+                type="button"
+                onClick={() => setIsZGuideOpen(!isZGuideOpen)}
+                className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-all flex items-center gap-1 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+              >
+                <BookOpen size={13} className="text-blue-500" />
+                <span>איך לנווט בטבלה?</span>
+                <ChevronDown 
+                  size={12} 
+                  className={`transition-transform duration-300 ${isZGuideOpen ? 'rotate-180' : ''}`} 
+                />
+              </button>
+            </div>
+          </div>
+
+          <AnimatePresence initial={false}>
+            {isZGuideOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                <div className="p-4 bg-slate-50/40 dark:bg-slate-900/10 border border-slate-150 dark:border-slate-800/60 rounded-xl text-right animate-none">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-semibold flex-1">
+                      ערך ה-Z מופיע <strong>בשולי הטבלה</strong> (אנכית השורה עם השלם והעשירית, ואופקית העמודה עם המאית). 
+                      ערך ה-PHI (ההסתברות המצטברת משמאל) מופיע <strong>בתוך תאי הטבלה</strong>.
+                    </p>
+                    <div className="text-sm bg-blue-500/10 p-2 rounded-lg border border-blue-500/15 text-blue-700 dark:text-blue-300 whitespace-nowrap md:self-center shrink-0" dir="rtl">
+                      דוגמה: למציאת <InlineMath math="Z=1.96" />, נצליב שורה 1.9 ועמודה 0.06 כדי לקבל <InlineMath math="0.9750" />.
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* SECTION: POPULAR Z-VALUES FOR HYPOTHESIS TESTING */}
+          <div className="space-y-3 pt-2">
+            <h4 className="text-xs sm:text-sm font-black text-slate-750 dark:text-slate-200 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded bg-blue-500" />
+              ערכי Z פופולריים בבחינת השערות (רמות אלפא ורמות סמך מקובלות)
+            </h4>
+            <div className="overflow-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 p-1">
+              <table className="w-full text-xs border-collapse text-center">
+                <thead>
+                  <tr className="bg-slate-100 dark:bg-slate-800/80 font-extrabold text-slate-700 dark:text-slate-300">
+                    <th className="p-2 border border-slate-200 dark:border-slate-700 font-bold bg-slate-200/50 dark:bg-slate-750 text-right w-28">
+                      ערך ה-Z
+                    </th>
+                    {[1.282, 1.645, 1.960, 2.326, 2.576, 3.090, 3.291, 3.891, 4.417].map((z, idx) => (
+                      <th key={idx} className="p-2 border border-slate-200 dark:border-slate-755 font-mono font-black text-blue-600 dark:text-blue-400 min-w-[70px]">
+                        {z.toFixed(3)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="text-slate-600 dark:text-slate-300 font-semibold bg-white dark:bg-slate-900">
+                    <td className="p-2 border border-slate-200 dark:border-slate-700 font-bold bg-slate-100 dark:bg-slate-800/60 text-right">
+                      <InlineMath math="\Phi(z)" /> (הסתברות)
+                    </td>
+                    {['0.90', '0.95', '0.975', '0.99', '0.995', '0.999', '0.9995', '0.99995', '0.999995'].map((phi, idx) => (
+                      <td key={idx} className="p-2 border border-slate-200 dark:border-slate-700 font-mono text-slate-800 dark:text-slate-200">
+                        {phi}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="text-[10px] text-slate-500 dark:text-slate-400 font-medium bg-white dark:bg-slate-900">
+                    <td className="p-2 border border-slate-200 dark:border-slate-700 font-bold bg-slate-100 dark:bg-slate-800/60 text-right leading-tight">
+                      רמת סמך / שימוש מקובל
+                    </td>
+                    {[
+                      '90% (חד-צדדי)',
+                      '95% (חד) / 90% (דו)',
+                      '95% (דו-צדדי)',
+                      '99% (חד-צדדי)',
+                      '99% (דו-צדדי)',
+                      '99.9% (חד-צדדי)',
+                      '99.9% (דו-צדדי)',
+                      '99.99% (דו-צדדי)',
+                      '99.999% (דו-צדדי)'
+                    ].map((desc, idx) => (
+                      <td key={idx} className="p-2 border border-slate-200 dark:border-slate-700 leading-snug">
+                        {desc}
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
 
           {renderTableSection(rows)}
         </div>
 
-        {/* SECTION 2: STUDENT'S T-TABLE WITH INTERACTIVE CALCULATOR */}
-        <div className="space-y-4 pt-4 border-t border-slate-150 dark:border-slate-800">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b pb-3 border-slate-100 dark:border-slate-800">
-            <div>
-              <h3 className="text-base sm:text-lg font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-                טבלת T קריטית (התפלגות Student's t)
-              </h3>
-              <p className="text-xs text-slate-400 mt-1">ערכי סף קריטיים וערכי מובהקות אלפא לפי דרגות חופש</p>
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl text-xs">
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-slate-400">דרגות חופש (df):</span>
+        {/* Result & Helper steps for Z Table */}
+        {lookupZ !== null && (
+          <div className={`p-5 border rounded-2xl font-sans shadow-sm transition-colors ${
+            theme === 'dark' ? 'bg-slate-950/60 border-slate-800 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'
+          }`}>
+            {isZNegative ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 font-black text-sm text-blue-600 dark:text-blue-400">
+                  <Info size={18} className="text-blue-500 shrink-0" />
+                  <span>חישוב שלב עזר עבור ערך Z שלילי ({actualZ?.toFixed(2)})</span>
+                </div>
+                <div className="space-y-3 leading-relaxed">
+                  <p className="text-sm text-slate-600 dark:text-slate-350 font-semibold">כדי למצוא את תוצאת הפונקציה <InlineMath math="\Phi" /> עבור ערך <InlineMath math="z" /> שלילי, נשתמש בכלל הסימטריה המוכר בסטטיסטיקה:</p>
+                  <div className="text-center py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-805 rounded-xl overflow-x-auto text-sm sm:text-base font-bold shadow-sm text-blue-600 dark:text-blue-300">
+                    <InlineMath math={`\\Phi(${actualZ?.toFixed(2)}) = 1 - \\Phi(${lookupZ.toFixed(2)})`} />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 text-right">
+                    <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
+                      <p className="text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-extrabold">שלב 1: מציאת הערך החיובי בטבלה</p>
+                      <p className="font-bold text-xs text-slate-500 dark:text-slate-400">
+                        הצלבנו שורה {rowVal?.toFixed(1)}, עמודה {colVal?.toFixed(2).slice(2)}
+                      </p>
+                      <p className="text-sm sm:text-base font-black text-slate-850 dark:text-slate-100 mt-1">
+                        <InlineMath math={`\\Phi(${lookupZ.toFixed(2)}) = ${normalCDF(lookupZ, 0, 1).toFixed(4)}`} />
+                      </p>
+                    </div>
+                    <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
+                      <p className="text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-extrabold">שלב 2: חיסור ההסתברות המצטברת מ-1</p>
+                      <p className="font-bold text-xs text-slate-500 dark:text-slate-400">
+                        <InlineMath math={`1 - ${normalCDF(lookupZ, 0, 1).toFixed(4)}`} />
+                      </p>
+                      <p className="text-sm sm:text-base font-black text-emerald-600 dark:text-emerald-400 mt-1">
+                        = {normalCDF(actualZ!, 0, 1).toFixed(4)}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="font-black text-center text-base sm:text-lg pt-4 border-t border-slate-200 dark:border-slate-800 text-indigo-600 dark:text-indigo-400">
+                    תוצאה סופית: <InlineMath math={`\\Phi(${actualZ?.toFixed(2)}) = ${normalCDF(actualZ!, 0, 1).toFixed(4)}`} />
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-blue-500/10 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-500/20">
+                    <Calculator size={18} className="stroke-[2.5]" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm sm:text-base font-black leading-normal text-slate-900 dark:text-slate-50">
+                      עבור <InlineMath math={`Z = ${lookupZ.toFixed(2)}`} /> התקבלה הסתברות <InlineMath math={`\\Phi(z) = ${normalCDF(lookupZ, 0, 1).toFixed(4)}`} />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                  <div className="flex flex-col text-center">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">שורה</span>
+                    <span className="font-black text-sm text-slate-800 dark:text-slate-200">{rowVal?.toFixed(1)}</span>
+                  </div>
+                  <div className="w-px h-6 bg-slate-200 dark:bg-slate-800" />
+                  <div className="flex flex-col text-center">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">עמודה</span>
+                    <span className="font-black text-sm text-slate-800 dark:text-slate-200">{colVal?.toFixed(2).slice(2)}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const TTable: React.FC<{ theme: 'light' | 'dark' }> = ({ theme }) => {
+  const [isTGuideOpen, setIsTGuideOpen] = useState<boolean>(false);
+  const [tDf, setTDf] = useState<number>(10);
+  const [tAlpha, setTAlpha] = useState<number>(0.05);
+  const [tSide, setTSide] = useState<'two'>('two');
+
+  const dfList = useMemo(() => [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
+    11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 
+    21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 
+    40, 50, 60, 80, 100, 120, 500
+  ], []);
+
+  const tCols = useMemo(() => [
+    { oneTail: 0.10, twoTail: 0.20 },
+    { oneTail: 0.05, twoTail: 0.10 },
+    { oneTail: 0.025, twoTail: 0.05 },
+    { oneTail: 0.01, twoTail: 0.02 },
+    { oneTail: 0.005, twoTail: 0.01 },
+    { oneTail: 0.0005, twoTail: 0.001 }
+  ], []);
+
+  const computedTCritical = useMemo(() => {
+    if (tDf <= 0 || isNaN(tDf)) return null;
+    const targetP = tSide === 'two' ? 1 - (tAlpha / 2) : 1 - tAlpha;
+    if (targetP <= 0 || targetP >= 1 || isNaN(targetP)) return null;
+    return studentTInverseCDF(targetP, tDf);
+  }, [tDf, tAlpha, tSide]);
+
+  const renderTTableSection = () => (
+    <div className="overflow-auto rounded-xl border border-slate-200 dark:border-slate-800 max-h-[480px]">
+      <table className="w-full text-xs sm:text-sm border-collapse">
+        <thead>
+          <tr className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+            <th rowSpan={2} className="sticky top-0 right-0 p-3 border border-slate-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-400 font-black text-center text-xs sm:text-sm w-16 bg-slate-100 dark:bg-slate-800 z-30">
+              דרגות חופש <br/> (df)
+            </th>
+            <th colSpan={6} className="sticky top-0 p-1.5 border-b border-slate-200 dark:border-slate-705 font-extrabold text-center text-xs bg-slate-100 dark:bg-slate-800 z-20">
+              רמת מובהקות עבור התפלגות T
+            </th>
+          </tr>
+          <tr className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+            {tCols.map((c, idx) => {
+              const isActiveCol = (tSide === 'two' && Math.abs(tAlpha - c.twoTail) < 0.0001);
+              return (
+                <th
+                  key={idx}
+                  className={`sticky top-0 p-2.5 border border-slate-200 dark:border-slate-700 font-bold text-center transition-colors min-w-[70px] z-20 ${
+                    isActiveCol
+                      ? 'bg-indigo-600 text-white dark:bg-indigo-600'
+                      : 'bg-slate-100 dark:bg-slate-800'
+                  }`}
+                >
+                  <div className="text-[10px] opacity-75">חד-צדדי: {c.oneTail}</div>
+                  <div className="text-xs">דו-צדדי: {c.twoTail}</div>
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {dfList.map(df => {
+            const isRowActive = df === tDf;
+            return (
+              <tr key={df} className={`transition-colors duration-200 ${
+                isRowActive 
+                  ? theme === 'dark' ? 'bg-indigo-950/20' : 'bg-indigo-50/50' 
+                  : 'hover:bg-slate-50/50 dark:hover:bg-slate-800/20'
+              }`}>
+                <td className={`sticky right-0 p-2.5 border border-slate-200 dark:border-slate-700 font-black text-center text-xs sm:text-sm transition-colors duration-300 z-10 ${
+                  isRowActive 
+                    ? 'bg-indigo-600 text-white dark:bg-indigo-500' 
+                    : 'text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-900'
+                }`}>
+                  {df === 500 ? '∞ (Z)' : df}
+                </td>
+                {tCols.map((c, colIdx) => {
+                  const val = studentTInverseCDF(1 - c.oneTail, df);
+                  const isActiveCol = (tSide === 'two' && Math.abs(tAlpha - c.twoTail) < 0.0001);
+                  const isActive = isRowActive && isActiveCol;
+
+                  return (
+                    <td
+                      key={colIdx}
+                      className={`p-2.5 border border-slate-200 dark:border-slate-700 text-center transition-all duration-300 tabular-nums ${
+                        isActive 
+                          ? 'bg-indigo-600 text-white dark:bg-indigo-600 font-black scale-102 shadow-lg z-10 relative rounded-md' 
+                          : isRowActive
+                            ? 'bg-indigo-100/40 text-indigo-900 dark:bg-indigo-900/20 dark:text-indigo-300 font-semibold'
+                            : isActiveCol
+                              ? 'bg-indigo-50/60 text-indigo-900 dark:bg-indigo-950/20 dark:text-indigo-300 font-semibold'
+                              : 'text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium'
+                      }`}
+                    >
+                      {val.toFixed(4)}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  return (
+    <div className={`overflow-hidden border rounded-3xl shadow-xl transition-all ${
+      theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+    }`} dir="rtl">
+      <div className="p-6 space-y-4">
+        <div className="flex flex-col gap-3 border-b pb-3 border-slate-100 dark:border-slate-800">
+          <div>
+            <h3 className="text-base sm:text-lg font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
+              טבלת T קריטית (התפלגות Student's t)
+            </h3>
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1.5 px-2 rounded-xl text-xs max-w-full shrink-0 shadow-sm">
+              <div className="flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-300">
+                <span>בדיקה:</span>
+                <select 
+                  value={tSide}
+                  onChange={(e) => setTSide(e.target.value as 'one' | 'two')}
+                  style={{ fontSize: '15.6px' }}
+                  className="px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded font-bold cursor-pointer text-xs text-indigo-600 dark:text-indigo-400 animate-none"
+                >
+                  <option value="two">דו-צדדית</option>
+                  <option value="one">חד-צדדית</option>
+                </select>
+              </div>
+
+              <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
+
+              <div className="flex items-center gap-1 text-slate-700 dark:text-slate-300">
+                <span className="font-bold">df:</span>
                 <input 
                   type="number" 
                   min="1" 
                   max="500" 
                   value={tDf}
                   onChange={(e) => setTDf(Math.max(1, parseInt(e.target.value) || 10))}
-                  className="w-12 px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded font-bold font-mono text-center text-indigo-600 dark:text-indigo-400"
+                  style={{ width: '51px', fontFamily: 'Assistant, sans-serif', fontSize: '15.6px' }}
+                  className="px-1 py-0.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded font-bold font-mono text-center text-indigo-600 dark:text-indigo-400 animate-none"
                 />
               </div>
 
               <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
 
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-slate-400">רמת אלפא (α):</span>
+              <div className="flex items-center gap-1 text-slate-700 dark:text-slate-300">
+                <span className="font-bold">אלפא (α):</span>
                 <select 
                   value={tAlpha}
                   onChange={(e) => setTAlpha(parseFloat(e.target.value))}
+                  style={{ fontFamily: 'Assistant, sans-serif', fontSize: '15.6px' }}
                   className="px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded font-bold font-mono text-center text-indigo-600 dark:text-indigo-400 cursor-pointer text-xs"
                 >
                   <option value={0.20}>0.20</option>
@@ -1044,112 +1318,70 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
                   <option value={0.001}>0.001</option>
                 </select>
               </div>
-            </div>
-          </div>
 
-          {/* Interactive Calculation Result Banner */}
-          {computedTCritical !== null && (
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-4 bg-indigo-50/60 dark:bg-indigo-950/20 text-indigo-900 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-900/30 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 font-sans shadow-sm"
+              {computedTCritical !== null && (
+                <>
+                  <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
+                  <div 
+                    style={{ fontSize: '15.6px' }}
+                    className="flex items-center gap-1 bg-indigo-600 text-white font-extrabold px-2 py-0.5 rounded-lg select-all tabular-nums text-xs border border-indigo-700 shadow-sm" 
+                    dir="ltr"
+                  >
+                    <span className="opacity-85 mr-1 text-[10px]">t_crit =</span>
+                    <span>{computedTCritical.toFixed(4)}</span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsTGuideOpen(!isTGuideOpen)}
+              className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-all flex items-center gap-1 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
             >
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-lg">
-                  <Calculator size={18} className="stroke-[2.5]" />
-                </div>
-                <div className="text-right">
-                  <div className="text-[10px] font-black uppercase text-indigo-500">ערך קריטי מסף המחשב הדינמי</div>
-                  <div className="text-xs sm:text-sm font-extrabold leading-normal mt-0.5">
-                    עבור התפלגות T עם <InlineMath math={`df = ${tDf === 500 ? '\\infty' : tDf}`} /> במובהקות דו-צדדית <InlineMath math={`\\alpha_{two-tail} = ${tAlpha}`} /> ({`חד-צדדית: \\alpha_{one-tail} = ${(tAlpha/2)}`}):
+              <BookOpen size={13} className="text-indigo-500" />
+              <span>איך לנווט בטבלה?</span>
+              <ChevronDown 
+                size={12} 
+                className={`transition-transform duration-300 ${isTGuideOpen ? 'rotate-180' : ''}`} 
+              />
+            </button>
+          </div>
+        </div>
+
+        <AnimatePresence initial={false}>
+          {isTGuideOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="p-4 bg-slate-50/40 dark:bg-slate-900/10 border border-slate-150 dark:border-slate-800/60 rounded-xl text-right">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-semibold flex-1">
+                    דרגות החופש (df) מופיעות <strong>בשורה האנכית הימנית</strong>, ואילו רמות המובהקות (<InlineMath math="\alpha" /> חד-צדדי או דו-צדדי) מופיעות <strong>בראש העמודות</strong>. 
+                    מפגש השורה והעמודה נותן את ערך ה-T הפיזי הקריטי המבוקש.
+                  </p>
+                  <div className="text-sm bg-indigo-500/10 p-2 rounded-lg border border-indigo-500/15 text-indigo-700 dark:text-indigo-300 whitespace-nowrap md:self-center shrink-0" dir="rtl">
+                    דוגמה: עבור <InlineMath math="df = 10" /> ובדיקה דו-צדדית עם <InlineMath math="\alpha = 0.05" />, נקבל ערך קריטי של <InlineMath math="t = 2.2281" />.
                   </div>
                 </div>
-              </div>
-              <div className="bg-indigo-600 text-white border border-indigo-700 py-1.5 px-4 rounded-xl font-bold shadow-md select-all tabular-nums text-sm sm:text-base">
-                <InlineMath math={`t_{crit} = ${computedTCritical.toFixed(4)}`} />
               </div>
             </motion.div>
           )}
+        </AnimatePresence>
 
-          {renderTTableSection()}
-        </div>
+        {renderTTableSection()}
       </div>
-
-      {/* Result Footer */}
-      {lookupZ !== null && (
-        <div className={`p-5 border-t font-sans shadow-inner rounded-b-2xl transition-colors ${
-          theme === 'dark' ? 'bg-slate-950/60 border-slate-800 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'
-        }`}>
-          {isZNegative ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 font-black text-sm text-blue-600 dark:text-blue-400">
-                <Info size={18} className="text-blue-500 shrink-0" />
-                <span>חישוב שלב עזר עבור ערך Z שלילי ({actualZ?.toFixed(2)})</span>
-              </div>
-              <div className="space-y-3 leading-relaxed">
-                <p className="text-sm text-slate-600 dark:text-slate-350 font-semibold">כדי למצוא את תוצאת הפונקציה <InlineMath math="\Phi" /> עבור ערך <InlineMath math="z" /> שלילי, נשתמש בכלל הסימטריה המוכר בסטטיסטיקה:</p>
-                <div className="text-center py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-x-auto text-sm sm:text-base font-bold shadow-sm text-blue-600 dark:text-blue-300">
-                  <InlineMath math={`\\Phi(${actualZ?.toFixed(2)}) = 1 - \\Phi(${lookupZ.toFixed(2)})`} />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 text-right">
-                  <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
-                    <p className="text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-extrabold">שלב 1: מציאת הערך החיובי בטבלה</p>
-                    <p className="font-bold text-xs text-slate-500 dark:text-slate-400">
-                      הצלבנו שורה {rowVal?.toFixed(1)}, עמודה {colVal?.toFixed(2).slice(2)}
-                    </p>
-                    <p className="text-sm sm:text-base font-black text-slate-850 dark:text-slate-100 mt-1">
-                      <InlineMath math={`\\Phi(${lookupZ.toFixed(2)}) = ${normalCDF(lookupZ, 0, 1).toFixed(4)}`} />
-                    </p>
-                  </div>
-                  <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
-                    <p className="text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-extrabold">שלב 2: חיסור ההסתברות המצטברת מ-1</p>
-                    <p className="font-bold text-xs text-slate-500 dark:text-slate-400">
-                      <InlineMath math={`1 - ${normalCDF(lookupZ, 0, 1).toFixed(4)}`} />
-                    </p>
-                    <p className="text-sm sm:text-base font-black text-emerald-600 dark:text-emerald-400 mt-1">
-                      = {normalCDF(actualZ!, 0, 1).toFixed(4)}
-                    </p>
-                  </div>
-                </div>
-                <p className="font-black text-center text-base sm:text-lg pt-4 border-t border-slate-200 dark:border-slate-800 text-indigo-600 dark:text-indigo-400">
-                  תוצאה סופית: <InlineMath math={`\\Phi(${actualZ?.toFixed(2)}) = ${normalCDF(actualZ!, 0, 1).toFixed(4)}`} />
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-blue-500/10 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-500/20">
-                  <Calculator size={18} className="stroke-[2.5]" />
-                </div>
-                <div className="text-right">
-                  <div className="text-[10px] uppercase font-bold text-slate-550 dark:text-slate-400">תוצאה מתוך הצלבת נתוני הטבלה</div>
-                  <div className="text-sm sm:text-base font-black leading-normal text-slate-900 dark:text-slate-50">
-                    עבור <InlineMath math={`Z = ${lookupZ.toFixed(2)}`} /> התקבלה הסתברות <InlineMath math={`\\Phi(z) = ${normalCDF(lookupZ, 0, 1).toFixed(4)}`} />
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div className="flex flex-col text-center">
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">שורה</span>
-                  <span className="font-black text-sm text-slate-800 dark:text-slate-200">{rowVal?.toFixed(1)}</span>
-                </div>
-                <div className="w-px h-6 bg-slate-200 dark:bg-slate-800" />
-                <div className="flex flex-col text-center">
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">עמודה</span>
-                  <span className="font-black text-sm text-slate-800 dark:text-slate-200">{colVal?.toFixed(2).slice(2)}</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };
 
 export default function NormalDistributionCalculator() {
   const [mode, setMode] = useState<CalcMode>('forward');
+  const [isInputPanelOpen, setIsInputPanelOpen] = useState<boolean>(true);
   const [mean, setMean] = useState<number>(170);
   const [meanInput, setMeanInput] = useState<string>('170');
   const [meanError, setMeanError] = useState<string | null>(null);
@@ -1157,6 +1389,8 @@ export default function NormalDistributionCalculator() {
   const [stdDev, setStdDev] = useState<number>(5);
   const [stdDevInput, setStdDevInput] = useState<string>('5');
   const [stdDevError, setStdDevError] = useState<string | null>(null);
+  const [varianceInput, setVarianceInput] = useState<string>('25');
+  const [varianceError, setVarianceError] = useState<string | null>(null);
 
   const [type, setType] = useState<CalcType>('below');
   const [inverseType, setInverseType] = useState<'lower' | 'upper'>('lower');
@@ -1211,20 +1445,53 @@ export default function NormalDistributionCalculator() {
     const parsed = parseFloat(val);
     if (val.trim() === '') {
       setStdDevError('שדה חובה');
+      setVarianceInput('');
+      setVarianceError('שדה חובה');
     } else if (isNaN(parsed)) {
       setStdDevError('אנא הזן מספר תקין');
+      setVarianceInput('');
+      setVarianceError('אנא הזן מספר תקין');
     } else if (parsed <= 0) {
       setStdDevError('סטיית התקן חייבת להיות גדולה מ-0 בלבד!');
+      setVarianceInput('');
+      setVarianceError('השונות חייבת להיות גדולה מ-0 בלבד!');
     } else {
       setStdDevError(null);
       setStdDev(parsed);
+      const computedVar = parsed * parsed;
+      setVarianceInput(parseFloat(computedVar.toFixed(6)).toString());
+      setVarianceError(null);
+    }
+  };
+
+  const handleVarianceChange = (val: string) => {
+    setVarianceInput(val);
+    const parsed = parseFloat(val);
+    if (val.trim() === '') {
+      setVarianceError('שדה חובה');
+      setStdDevInput('');
+      setStdDevError('שדה חובה');
+    } else if (isNaN(parsed)) {
+      setVarianceError('אנא הזן מספר תקין');
+      setStdDevInput('');
+      setStdDevError('אנא הזן מספר תקין');
+    } else if (parsed <= 0) {
+      setVarianceError('השונות חייבת להיות גדולה מ-0 בלבד!');
+      setStdDevInput('');
+      setStdDevError('סטיית התקן חייבת להיות גדולה מ-0 בלבד!');
+    } else {
+      setVarianceError(null);
+      const computedStdDev = Math.sqrt(parsed);
+      setStdDev(computedStdDev);
+      setStdDevInput(parseFloat(computedStdDev.toFixed(6)).toString());
+      setStdDevError(null);
     }
   };
 
   // Quick validations check before processing
   const isValidToCalculate = useMemo(() => {
-    return stdDev > 0 && !isNaN(mean) && !stdDevError && !meanError;
-  }, [stdDev, mean, stdDevError, meanError]);
+    return stdDev > 0 && !isNaN(mean) && !stdDevError && !meanError && !varianceError;
+  }, [stdDev, mean, stdDevError, meanError, varianceError]);
 
   const result = useMemo((): CalculationResult => {
     if (!isValidToCalculate) {
@@ -1449,6 +1716,40 @@ export default function NormalDistributionCalculator() {
     return groups;
   }, [result.steps]);
 
+  const inputSummaryText = useMemo(() => {
+    if (mode === 'forward') {
+      let typeName = '';
+      let xRange = '';
+      switch (type) {
+        case 'below':
+          typeName = 'הסתברות מתחת ל-X';
+          xRange = `X = ${x1}`;
+          break;
+        case 'above':
+          typeName = 'הסתברות מעל ל-X';
+          xRange = `X = ${x1}`;
+          break;
+        case 'between':
+          typeName = 'הסתברות בין ערכים';
+          xRange = `${x1} ≤ X ≤ ${x2}`;
+          break;
+        case 'outside':
+          typeName = 'הסתברות מחוץ לטווח';
+          xRange = `X < ${x1} או X > ${x2}`;
+          break;
+        case 'conditional':
+          typeName = 'הסתברות מותנה';
+          xRange = 'מותנה מראש';
+          break;
+      }
+      return `תוחלת: μ = ${mean}, ס.תקן: σ = ${stdDev} | ${typeName} (${xRange})`;
+    } else if (mode === 'inverse') {
+      const side = inverseType === 'lower' ? 'מצטבר משמאל' : 'מצטבר מימין';
+      return `תוחלת: μ = ${mean}, ס.תקן: σ = ${stdDev} | אחוזון ${percentile}% (${side})`;
+    }
+    return '';
+  }, [mode, mean, stdDev, type, x1, x2, inverseType, percentile]);
+
   return (
     <div className={`min-h-screen font-sans selection:bg-blue-200 transition-colors duration-300 ${
       theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
@@ -1551,326 +1852,325 @@ export default function NormalDistributionCalculator() {
           </div>
 
           {/* Notation Header Banner */}
-          {mode !== 'hypothesis' && mode !== 'formula-sheet' && (
-            <div className={`rounded-3xl border p-6 text-center relative overflow-hidden mb-8 shadow-sm transition-all ${
-              theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
-            }`}>
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-600 to-green-500" />
-              <div className="text-blue-500 dark:text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-3">הגדרה פורמלית של משתנה מקרי נורמלי</div>
-              <div className="py-2 overflow-x-auto text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight" dir="ltr">
-                <InlineMath math={`X \\sim N(\\mu = ${isValidToCalculate ? mean : '?'}, \\sigma^2 = ${isValidToCalculate ? (stdDev * stdDev).toFixed(2) : '?'})`} />
-              </div>
-              <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs font-black text-slate-400">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-blue-500" />
-                  תוחלת (ממוצע): {isValidToCalculate ? mean : '?'}
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                  סטיית תקן: {isValidToCalculate ? stdDev : '?'}
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-indigo-500" />
-                  שונות: {isValidToCalculate ? (stdDev * stdDev).toFixed(2) : '?'}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {mode === 'hypothesis' ? (
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <HypothesisTestingCalculator theme={theme} />
-            </motion.div>
-          ) : mode === 'table' ? (
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`rounded-2xl p-6 border shadow-sm transition-all ${
-                theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
-              }`}
-            >
-              <div className="mb-6">
-                <h2 className="text-xl font-bold mb-2">טבלת התפלגות נורמלית סטנדרטית (Z)</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  השתמש בטבלה השלמה כדי לאתר ערכים מוגדרים של ה-CDF, המייצגים את פונקציית <InlineMath math="\Phi" />. 
-                  ניתן להקליד ערכי חיפוש כדי להצליב את השורה והעמודה בדיוק כחץ מכוון.
-                </p>
-              </div>
-              <ZTable showSearch={true} theme={theme} />
-            </motion.div>
-          ) : mode === 'formula-sheet' ? (
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <FormulaSheet theme={theme} />
-            </motion.div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {mode !== 'hypothesis' && mode !== 'formula-sheet' && mode !== 'table' && (
+            <div className="space-y-8 w-full">
               
-              {/* Left Column Input Panel */}
-              <section className="lg:col-span-5 space-y-6">
-                <div className={`rounded-2xl p-6 border shadow-sm transition-all ${
+              {/* Left Column Input Panel Layout */}
+              <section className="w-full space-y-6">
+                <div className={`rounded-2xl border shadow-sm transition-all overflow-visible relative z-10 ${
                   theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
                 }`}>
-                  
-                  {/* Informational Widget */}
-                  <div className="mb-6">
-                    <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-md relative overflow-hidden" dir="ltr">
-                      <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-10 -mt-10 blur-xl" />
-                      <div className="relative z-10 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Info size={16} className="text-blue-200" />
-                          <p className="text-xs font-black tracking-wide text-blue-100">סטיית תקן μ ו-σ</p>
-                        </div>
-                        <p className="text-xs text-slate-100 leading-relaxed text-right">
-                          בסטטיסטיקה, מעבר לערכים אמיתיים משתמשים בנוסחת התקנון להפיכת המשתנה המקרי ל-Z (התפלגות סטנדרטית בעלת תוחלת 0 וסטיית תקן 1).
-                        </p>
-                      </div>
+                  {/* Accordion Toggle Bar */}
+                  <button
+                    type="button"
+                    onClick={() => setIsInputPanelOpen(!isInputPanelOpen)}
+                    className="w-full text-right px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all cursor-pointer bg-transparent outline-none border-b border-slate-100 dark:border-slate-800 pb-4"
+                  >
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse" />
+                      <span className="font-extrabold text-sm sm:text-base text-slate-800 dark:text-slate-100">
+                        קלט נתונים ופרמטרי ההתפלגות (קליטת נתונים)
+                      </span>
+                      <span className={`text-[11px] font-black px-2.5 py-1 rounded-full border shadow-sm transition-all ${
+                        theme === 'dark' 
+                          ? 'bg-slate-800 border-slate-700 text-blue-300' 
+                          : 'bg-blue-50/50 border-blue-100 text-blue-700'
+                      }`}>
+                        {inputSummaryText}
+                      </span>
                     </div>
-                  </div>
-
-                  <h2 className="text-base font-black mb-4 flex items-center gap-2">
-                    <RefreshCw size={16} className="text-blue-500" />
-                    פרמטרי ההתפלגות
-                  </h2>
-
-                  {/* Input Fields */}
-                  <div className="space-y-4 mb-6">
-                    {/* Mean Input */}
-                    <div className="space-y-1">
-                      <Tooltip content="הערך המרכזי של פעמון ההתפלגות (התוחלת)" theme={theme}>
-                        <label className="text-xs font-black text-slate-400 ml-1 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700">תוחלת (μ):</label>
-                      </Tooltip>
-                      <input 
-                        type="text" 
-                        value={meanInput} 
-                        onChange={(e) => handleMeanChange(e.target.value)}
-                        className={`w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none transition-all font-mono font-bold text-slate-900 dark:text-slate-100 ${
-                          meanError 
-                            ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' 
-                            : 'border-slate-200 dark:border-slate-700 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500'
-                        }`}
-                        placeholder="הזן ממוצע, לדוגמה: 170"
+                    
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 self-end sm:self-auto">
+                      <span>{isInputPanelOpen ? 'הסתר פאנל קלט' : 'הצג פאנל קלט'}</span>
+                      <ChevronDown 
+                        size={15} 
+                        className={`transition-transform duration-300 ${isInputPanelOpen ? 'rotate-180' : ''}`} 
                       />
-                      {meanError && (
-                        <p className="text-[10px] text-red-500 font-bold flex items-center gap-1 mt-1">
-                          <AlertCircle size={10} className="stroke-[2.5]" />
-                          <span>{meanError}</span>
-                        </p>
-                      )}
                     </div>
+                  </button>
 
-                    {/* Standard Deviation Input (Strict Validation > 0) */}
-                    <div className="space-y-1">
-                      <Tooltip content="מדד הפיזור של הערכים סביב הממוצע (חייב להיו חיובי וגדול מ-0)" theme={theme}>
-                        <label className="text-xs font-black text-slate-400 ml-1 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700">סטיית תקן (σ):</label>
-                      </Tooltip>
-                      <input 
-                        type="text" 
-                        value={stdDevInput} 
-                        onChange={(e) => handleStdDevChange(e.target.value)}
-                        className={`w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none transition-all font-mono font-bold text-slate-900 dark:text-slate-100 ${
-                          stdDevError 
-                            ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' 
-                            : 'border-slate-200 dark:border-slate-700 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500'
-                        }`}
-                        placeholder="חייב להיות גדול מ-0"
-                      />
-                      {stdDevError ? (
-                        <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 p-2.5 rounded-lg mt-1 space-y-1">
-                          <p className="text-[11px] text-red-500 font-black flex items-center gap-1">
-                            <AlertCircle size={12} className="stroke-[2.5]" />
-                            <span>שגיאת קלט חסומה!</span>
-                          </p>
-                          <p className="text-[10px] text-red-500/80 leading-tight">
-                            {stdDevError}
-                          </p>
-                        </div>
-                      ) : (
-                        <p className="text-[10px] text-slate-400">יש להקפיד על ערך חיובי בלבד כדי למנוע חלוקה באפס.</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <AnimatePresence mode="wait">
-                    {mode === 'forward' ? (
-                      <motion.div 
-                        key="forward-container"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="space-y-6"
+                  <AnimatePresence initial={true}>
+                    {isInputPanelOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25 }}
+                        className="p-6"
+                        style={{ overflow: isInputPanelOpen ? 'visible' : 'hidden' }}
                       >
-                        <div className="border-t pt-4 border-slate-100 dark:border-slate-800">
-                          <h3 className="text-sm font-black mb-3 text-slate-400 flex items-center gap-1.5">
-                            מאורע הסתברות
-                            <HelpCircle size={13} />
-                          </h3>
-                          <div className="grid grid-cols-2 gap-2">
-                            {[
-                              { id: 'below', label: 'מתחת ל- X' },
-                              { id: 'above', label: 'מעל ל- X' },
-                              { id: 'between', label: 'בין X₁ ל- X₂' },
-                              { id: 'outside', label: 'מחוץ לטווח' },
-                              { id: 'conditional', label: 'מותנה מראש' }
-                            ].map((item) => (
-                              <button
-                                key={item.id}
-                                onClick={() => setType(item.id as CalcType)}
-                                className={`px-3 py-2 text-xs font-black rounded-lg transition-all border ${
-                                  type === item.id 
-                                    ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/10' 
-                                    : 'bg-slate-50 dark:bg-slate-850 text-slate-600 dark:text-slate-350 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
-                                }`}
-                              >
-                                {item.label}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        {type === 'conditional' ? (
-                          <div className="p-4 bg-slate-50 dark:bg-slate-850/60 rounded-xl border border-slate-100 dark:border-slate-800 space-y-4">
-                            <div className="space-y-2">
-                              <h4 className="text-xs font-black text-blue-500">מאורע A (ההסתברות המבוקשת)</h4>
-                              <select 
-                                value={condTypeA}
-                                onChange={(e) => setCondTypeA(e.target.value as CondType)}
-                                className="w-full p-2 text-xs bg-white dark:bg-slate-800 border rounded-lg outline-none font-bold"
-                              >
-                                <option value="below">X &lt; x</option>
-                                <option value="above">X &gt; x</option>
-                                <option value="between">x1 &lt; X &lt; x2</option>
-                              </select>
-                              <div className="grid grid-cols-2 gap-2">
-                                <input 
-                                  type="number" 
-                                  value={x1}
-                                  onChange={(e) => setX1(Number(e.target.value))}
-                                  className="p-2 text-xs font-bold border rounded-lg outline-none bg-white dark:bg-slate-800"
-                                  placeholder="x1"
-                                />
-                                {condTypeA === 'between' && (
-                                  <input 
-                                    type="number" 
-                                    value={x2}
-                                    onChange={(e) => setX2(Number(e.target.value))}
-                                    className="p-2 text-xs font-bold border rounded-lg outline-none bg-white dark:bg-slate-800"
-                                    placeholder="x2"
-                                  />
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="space-y-2 border-t pt-3 border-slate-200/50 dark:border-slate-800">
-                              <h4 className="text-xs font-black text-emerald-500">מאורע B (התנאי הנתון)</h4>
-                              <select 
-                                value={condType}
-                                onChange={(e) => setCondType(e.target.value as CondType)}
-                                className="w-full p-2 text-xs bg-white dark:bg-slate-800 border rounded-lg outline-none font-bold"
-                              >
-                                <option value="below">X &lt; x</option>
-                                <option value="above">X &gt; x</option>
-                                <option value="between">x1 &lt; X &lt; x2</option>
-                              </select>
-                              <div className="grid grid-cols-2 gap-2">
-                                <input 
-                                  type="number" 
-                                  value={condX1}
-                                  onChange={(e) => setCondX1(Number(e.target.value))}
-                                  className="p-2 text-xs font-bold border rounded-lg outline-none bg-white dark:bg-slate-800"
-                                  placeholder="x1"
-                                />
-                                {condType === 'between' && (
-                                  <input 
-                                    type="number" 
-                                    value={condX2}
-                                    onChange={(e) => setCondX2(Number(e.target.value))}
-                                    className="p-2 text-xs font-bold border rounded-lg outline-none bg-white dark:bg-slate-800"
-                                    placeholder="x2"
-                                  />
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="space-y-3">
+                        <div className="space-y-6 w-full">
+                          
+                          {/* Row 1: Mean and Standard Deviation side-by-side */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                            {/* Mean Input */}
                             <div className="space-y-1">
-                              <label className="text-xs font-black text-slate-400">
-                                {type === 'between' || type === 'outside' ? 'גבול תחתון X₁' : 'ערך משתנה X:'}
-                              </label>
+                              <Tooltip content="הערך המרכזי של פעמון ההתפלגות (התוחלת)" theme={theme}>
+                                <label className="text-xs font-black text-slate-400 ml-1 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700">תוחלת (μ):</label>
+                              </Tooltip>
                               <input 
-                                type="number" 
-                                value={x1}
-                                onChange={(e) => setX1(Number(e.target.value))}
-                                className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono font-bold text-sm text-slate-900 dark:text-slate-100"
+                                type="text" 
+                                value={meanInput} 
+                                onChange={(e) => handleMeanChange(e.target.value)}
+                                className={`w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none transition-all font-mono font-bold text-slate-900 dark:text-slate-100 ${
+                                  meanError 
+                                    ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' 
+                                    : 'border-slate-200 dark:border-slate-700 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500'
+                                }`}
+                                placeholder="הזן ממוצע, לדוגמה: 170"
                               />
+                              {meanError && (
+                                <p className="text-[10px] text-red-500 font-bold flex items-center gap-1 mt-1">
+                                  <AlertCircle size={10} className="stroke-[2.5]" />
+                                  <span>{meanError}</span>
+                                </p>
+                              )}
                             </div>
-                            { (type === 'between' || type === 'outside') && (
-                              <div className="space-y-1">
-                                <label className="text-xs font-black text-slate-400">גבול עליון X₂:</label>
-                                <input 
-                                  type="number" 
-                                  value={x2}
-                                  onChange={(e) => setX2(Number(e.target.value))}
-                                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono font-bold text-sm text-slate-900 dark:text-slate-100"
-                                />
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </motion.div>
-                    ) : (
-                      <motion.div 
-                        key="inverse-container"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="space-y-4"
-                      >
-                        <div className="space-y-2">
-                          <label className="text-xs font-black text-slate-400">סוג האחוזון הנדרש:</label>
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              onClick={() => setInverseType('lower')}
-                              className={`py-2 px-3 text-xs font-black rounded-lg transition-all border ${
-                                inverseType === 'lower' 
-                                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
-                                  : 'bg-slate-50 dark:bg-slate-850 text-slate-500 border-slate-200 dark:border-slate-800 hover:bg-slate-100'
-                              }`}
-                            >
-                              אחוזון מצטבר משמאל
-                            </button>
-                            <button
-                              onClick={() => setInverseType('upper')}
-                              className={`py-2 px-3 text-xs font-black rounded-lg transition-all border ${
-                                inverseType === 'upper' 
-                                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
-                                  : 'bg-slate-50 dark:bg-slate-850 text-slate-500 border-slate-200 dark:border-slate-800 hover:bg-slate-100'
-                              }`}
-                            >
-                              אחוזון מצטבר מימין
-                            </button>
-                          </div>
-                        </div>
 
-                        <div className="space-y-1">
-                          <label className="text-xs font-black text-slate-400">ערך האחוזון (P) באחוזים:</label>
-                          <div className="relative">
-                            <input 
-                              type="number" 
-                              value={percentile} 
-                              min="0.01"
-                              max="99.99"
-                              step="0.01"
-                              onChange={(e) => setPercentile(Math.min(99.99, Math.max(0.01, Number(e.target.value))))}
-                              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono font-bold text-sm pl-10 text-slate-900 dark:text-slate-100"
-                            />
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">%</span>
+                            {/* Standard Deviation / Variance Inputs */}
+                             <div className="grid grid-cols-2 gap-4">
+                               {/* Standard Deviation Input */}
+                               <div className="space-y-1">
+                                 <Tooltip content="מדד הפיזור של הערכים סביב הממוצע (חייב להיות חיובי וגדול מ-0)" theme={theme}>
+                                   <label className="text-xs font-black text-slate-400 ml-1 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700">סטיית תקן (σ):</label>
+                                 </Tooltip>
+                                 <input 
+                                   type="text" 
+                                   value={stdDevInput} 
+                                   onChange={(e) => handleStdDevChange(e.target.value)}
+                                   className={`w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none transition-all font-mono font-bold text-slate-900 dark:text-slate-100 ${
+                                     stdDevError 
+                                       ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' 
+                                       : 'border-slate-200 dark:border-slate-700 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500'
+                                   }`}
+                                   placeholder="חייב להיות גדול מ-0"
+                                 />
+                                 {stdDevError ? (
+                                   <p className="text-[10px] text-red-500 font-bold flex items-center gap-1 mt-1">
+                                     <AlertCircle size={10} className="stroke-[2.5]" />
+                                     <span>{stdDevError}</span>
+                                   </p>
+                                 ) : (
+                                   <p className="text-[10px] text-slate-400">יש להקפיד על ערך חיובי בלבד.</p>
+                                 )}
+                               </div>
+
+                               {/* Variance Input */}
+                               <div className="space-y-1">
+                                 <Tooltip content="שונות ההתפלגות (σ²), מחושבת ישירות כריבוע סטיית התקן" theme={theme}>
+                                   <label className="text-xs font-black text-slate-400 ml-1 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700">שונות (σ²):</label>
+                                 </Tooltip>
+                                 <input 
+                                   type="text" 
+                                   value={varianceInput} 
+                                   onChange={(e) => handleVarianceChange(e.target.value)}
+                                   className={`w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none transition-all font-mono font-bold text-slate-900 dark:text-slate-100 ${
+                                     varianceError 
+                                       ? 'border-red-500 text-red-505 ring-4 ring-red-500/10' 
+                                       : 'border-slate-200 dark:border-slate-700 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500'
+                                   }`}
+                                   placeholder="לדוגמה: 25"
+                                 />
+                                 {varianceError ? (
+                                   <p className="text-[10px] text-red-500 font-bold flex items-center gap-1 mt-1">
+                                     <AlertCircle size={10} className="stroke-[2.5]" />
+                                     <span>{varianceError}</span>
+                                   </p>
+                                 ) : (
+                                   <p className="text-[10px] text-slate-400">יש להקפיד על ערך חיובי בלבד.</p>
+                                 )}
+                               </div>
+                             </div>
                           </div>
-                          <p className="text-[10px] text-slate-400">הזן הסתברות בין 0.01% ל-99.99%.</p>
+
+                          {/* Row 2: Calculation options and X value side-by-side */}
+                          <div className="border-t pt-6 border-slate-100 dark:border-slate-800">
+                            <AnimatePresence mode="wait">
+                              {mode === 'forward' ? (
+                                <motion.div 
+                                  key="forward-container"
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  className="flex flex-col gap-5"
+                                >
+                                  <div className="space-y-3">
+                                    <h3 className="text-sm font-black mb-3 text-slate-400 flex items-center gap-1.5">
+                                      מאורע הסתברות
+                                      <HelpCircle size={13} />
+                                    </h3>
+                                    <div className="grid grid-cols-5 gap-1">
+                                      {[
+                                        { id: 'below', label: 'מתחת ל- X' },
+                                        { id: 'above', label: 'מעל ל- X' },
+                                        { id: 'between', label: 'בין X₁ ל- X₂' },
+                                        { id: 'outside', label: 'מחוץ לטווח' },
+                                        { id: 'conditional', label: 'מותנה מראש' }
+                                      ].map((item) => (
+                                        <button
+                                          key={item.id}
+                                          type="button"
+                                          onClick={() => setType(item.id as CalcType)}
+                                          className={`px-0.5 sm:px-2 py-1.5 text-[9px] min-[390px]:text-[10px] sm:text-xs font-black rounded-lg transition-all border text-center ${
+                                            type === item.id 
+                                              ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/10' 
+                                              : 'bg-slate-50 dark:bg-slate-850 text-slate-600 dark:text-slate-350 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                          }`}
+                                        >
+                                          {item.label}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {type === 'conditional' ? (
+                                    <div className="p-4 bg-slate-50 dark:bg-slate-850/60 rounded-xl border border-slate-100 dark:border-slate-800 space-y-4">
+                                      <div className="space-y-2">
+                                        <h4 className="text-xs font-black text-blue-500">מאורע A (ההסתברות המבוקשת)</h4>
+                                        <select 
+                                          value={condTypeA}
+                                          onChange={(e) => setCondTypeA(e.target.value as CondType)}
+                                          className="w-full p-2 text-xs bg-white dark:bg-slate-800 border rounded-lg outline-none font-bold text-slate-900 dark:text-slate-100"
+                                        >
+                                          <option value="below">X &lt; x</option>
+                                          <option value="above">X &gt; x</option>
+                                          <option value="between">x1 &lt; X &lt; x2</option>
+                                        </select>
+                                        <div className="grid grid-cols-2 gap-2">
+                                          <input 
+                                            type="number" 
+                                            value={x1}
+                                            onChange={(e) => setX1(Number(e.target.value))}
+                                            className="p-2 text-xs font-bold border rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                                            placeholder="x1"
+                                          />
+                                          {condTypeA === 'between' && (
+                                            <input 
+                                              type="number" 
+                                              value={x2}
+                                              onChange={(e) => setX2(Number(e.target.value))}
+                                              className="p-2 text-xs font-bold border rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                                              placeholder="x2"
+                                            />
+                                          )}
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="space-y-2 border-t pt-3 border-slate-200/50 dark:border-slate-800">
+                                        <h4 className="text-xs font-black text-emerald-500">מאורע B (התנאי הנתון)</h4>
+                                        <select 
+                                          value={condType}
+                                          onChange={(e) => setCondType(e.target.value as CondType)}
+                                          className="w-full p-2 text-xs bg-white dark:bg-slate-800 border rounded-lg outline-none font-bold text-slate-900 dark:text-slate-100"
+                                        >
+                                          <option value="below">X &lt; x</option>
+                                          <option value="above">X &gt; x</option>
+                                          <option value="between">x1 &lt; X &lt; x2</option>
+                                        </select>
+                                        <div className="grid grid-cols-2 gap-2">
+                                          <input 
+                                            type="number" 
+                                            value={condX1}
+                                            onChange={(e) => setCondX1(Number(e.target.value))}
+                                            className="p-2 text-xs font-bold border rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                                            placeholder="x1"
+                                          />
+                                          {condType === 'between' && (
+                                            <input 
+                                              type="number" 
+                                              value={condX2}
+                                              onChange={(e) => setCondX2(Number(e.target.value))}
+                                              className="p-2 text-xs font-bold border rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                                              placeholder="x2"
+                                            />
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="space-y-3">
+                                      <div className="space-y-1">
+                                        <label className="text-xs font-black text-slate-400">
+                                          {type === 'between' || type === 'outside' ? 'גבול תחתון X₁' : 'ערך משתנה X:'}
+                                        </label>
+                                        <input 
+                                          type="number" 
+                                          value={x1}
+                                          onChange={(e) => setX1(Number(e.target.value))}
+                                          className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono font-bold text-sm text-slate-900 dark:text-slate-100"
+                                        />
+                                      </div>
+                                      { (type === 'between' || type === 'outside') && (
+                                        <div className="space-y-1">
+                                          <label className="text-xs font-black text-slate-400">גבול עליון X₂:</label>
+                                          <input 
+                                            type="number" 
+                                            value={x2}
+                                            onChange={(e) => setX2(Number(e.target.value))}
+                                            className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono font-bold text-sm text-slate-900 dark:text-slate-100"
+                                          />
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </motion.div>
+                              ) : (
+                                <motion.div 
+                                  key="inverse-container"
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  className="flex flex-col gap-5"
+                                >
+                                  <div className="space-y-2">
+                                    <label className="text-xs font-black text-slate-400">סוג האחוזון הנדרש:</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => setInverseType('lower')}
+                                        className={`py-2 px-3 text-xs font-black rounded-lg transition-all border ${
+                                          inverseType === 'lower' 
+                                            ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
+                                            : 'bg-slate-50 dark:bg-slate-850 text-slate-500 border-slate-200 dark:border-slate-800 hover:bg-slate-100'
+                                        }`}
+                                      >
+                                        אחוזון מצטבר משמאל
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setInverseType('upper')}
+                                        className={`py-2 px-3 text-xs font-black rounded-lg transition-all border ${
+                                          inverseType === 'upper' 
+                                            ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
+                                            : 'bg-slate-50 dark:bg-slate-850 text-slate-500 border-slate-200 dark:border-slate-800 hover:bg-slate-100'
+                                        }`}
+                                      >
+                                        אחוזון מצטבר מימין
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  <div className="space-y-1">
+                                    <label className="text-xs font-black text-slate-400">ערך האחוזון (P) באחוזים:</label>
+                                    <div className="relative">
+                                      <input 
+                                        type="number" 
+                                        value={percentile} 
+                                        min="0.01"
+                                        max="99.99"
+                                        step="0.01"
+                                        onChange={(e) => setPercentile(Math.min(99.99, Math.max(0.01, Number(e.target.value))))}
+                                        className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono font-bold text-sm pl-10 text-slate-900 dark:text-slate-100"
+                                      />
+                                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">%</span>
+                                    </div>
+                                    <p className="text-[10px] text-slate-400">הזן הסתברות בין 0.01% ל-99.99%.</p>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+
+
+
                         </div>
                       </motion.div>
                     )}
@@ -1879,7 +2179,7 @@ export default function NormalDistributionCalculator() {
               </section>
 
               {/* Right Column Visualization & Step Breakdown */}
-              <section className="lg:col-span-7 space-y-8">
+              <section className="w-full space-y-8">
                 
                 {/* Dynamically Styled Math steps */}
                 <div className={`rounded-2xl p-6 border shadow-sm transition-colors ${
@@ -1937,7 +2237,7 @@ export default function NormalDistributionCalculator() {
 
               {/* Z-Table Lookup helper links right beneath the core loop */}
               {isValidToCalculate && (result.z1 !== undefined || result.z2 !== undefined) && (
-                <div className={`lg:col-span-12 rounded-2xl p-5 border shadow-sm transition-colors ${
+                <div className={`rounded-2xl p-5 border shadow-sm transition-colors ${
                   theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
                 }`}>
                   <h3 className="text-sm font-black mb-3 text-slate-400 flex items-center gap-1.5 leading-none">
@@ -1951,6 +2251,30 @@ export default function NormalDistributionCalculator() {
                 </div>
               )}
 
+            </div>
+          )}
+
+          {mode === 'hypothesis' && (
+            <HypothesisTestingCalculator theme={theme} />
+          )}
+
+          {mode === 'formula-sheet' && (
+            <FormulaSheet theme={theme} />
+          )}
+
+          {mode === 'table' && (
+            <div className="space-y-8 w-full">
+              <div className={`rounded-2xl p-6 border shadow-sm transition-colors ${
+                theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+              }`}>
+                <ZTable showSearch={true} theme={theme} />
+              </div>
+
+              <div className={`rounded-2xl p-6 border shadow-sm transition-colors ${
+                theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+              }`}>
+                <TTable theme={theme} />
+              </div>
             </div>
           )}
 

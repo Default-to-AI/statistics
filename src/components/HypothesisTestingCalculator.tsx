@@ -367,26 +367,11 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
     <div className="space-y-8" dir="rtl">
       
       {/* Decision Matrix Hero */}
-      <div className={`rounded-3xl border p-6 md:p-8 text-right relative overflow-hidden shadow-lg transition-all ${
+      <div className={`rounded-3xl border p-4 sm:p-5 text-right relative overflow-hidden shadow-lg transition-all ${
         theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-300'
       }`}>
         <div className="absolute top-0 right-0 w-full h-2 bg-gradient-to-l from-red-600 via-indigo-700 to-emerald-600" />
         
-        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
-          <div>
-            <span className="text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm font-black uppercase tracking-wider mb-2 flex items-center gap-2">
-              <Award size={16} />
-              <span>מבחני מובהקות וניתוח עוצמה סטטיסטית (Power Analysis)</span>
-            </span>
-            <h1 className={`text-xl sm:text-2xl md:text-3xl font-black tracking-tight ${theme === 'dark' ? 'text-slate-50' : 'text-slate-950'}`}>
-              מטריצת החלטה דינמית ודילמת הטעויות במחקר (2x2 Matrix)
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-semibold leading-relaxed">
-              הצטלבות בין ההחלטה הסטטיסטית במבחן לבין מצב האמת במציאות. כלי דינמי לחיזוי סיכויי התרחישים ועוצמת המבחן.
-            </p>
-          </div>
-        </div>
-
         {isValid && stats ? (
           <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-950/25">
             <table className="w-full text-sm text-right border-collapse">
@@ -412,16 +397,16 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                         <CheckCircle size={15} className="text-emerald-600 dark:text-emerald-450" />
                         החלטה נכונה
                       </span>
-                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 font-mono" dir="ltr">1 - α</span>
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400" dir="ltr">1 - α</span>
                     </div>
-                    <div className="text-2xl sm:text-3xl font-black mt-2 font-mono text-emerald-850 dark:text-emerald-300">
+                    <div className="text-2xl sm:text-3xl font-black mt-2 text-emerald-850 dark:text-emerald-300">
                       {((1 - alpha) * 100).toFixed(1)}%
                     </div>
                     <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
                       רמת הסמך הסטטיסטית (Confidence Level) – הסיכוי לא לקפוץ למסקנות שווא כאשר ההשערה אינה נכונה.
                     </p>
                   </td>
-
+ 
                   {/* Cell 1-2: Accept H0 but H1 is true => Type II Error Beta */}
                   <td className="p-4 sm:p-5 bg-amber-50/20 dark:bg-amber-950/10 hover:bg-amber-50/35 dark:hover:bg-amber-950/20 transition-all">
                     <div className="flex items-center justify-between gap-2">
@@ -429,9 +414,9 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                         <XCircle size={15} className="text-amber-600" />
                         טעות מסוג II
                       </span>
-                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 font-mono" dir="ltr">β (Beta)</span>
+                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400" dir="ltr">β (Beta)</span>
                     </div>
-                    <div className="text-2xl sm:text-3xl font-black mt-2 text-amber-750 dark:text-amber-300 font-mono">
+                    <div className="text-2xl sm:text-3xl font-black mt-2 text-amber-750 dark:text-amber-300">
                       {(stats.beta * 100).toFixed(2)}%
                     </div>
                     <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
@@ -439,14 +424,14 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                     </p>
                   </td>
                 </tr>
-
+ 
                 {/* Row 2: Reject H0 */}
                 <tr className="font-semibold text-slate-950 dark:text-slate-50">
                   <td className="p-4 sm:p-5 border-l border-slate-200 dark:border-slate-800 font-extrabold bg-slate-100/30 dark:bg-slate-900/40">
                     <span className="text-base font-black block">דחיית <InlineMath math="H_0" /></span>
                     <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-400 mt-1">קבלת הטענה האלטרנטיבית</span>
                   </td>
-
+ 
                   {/* Cell 2-1: Reject H0 and H0 is true => Type I Error Alpha */}
                   <td className="p-4 sm:p-5 border-l border-slate-200 dark:border-slate-800 bg-red-50/20 dark:bg-red-950/10 hover:bg-red-50/35 dark:hover:bg-red-950/20 transition-all">
                     <div className="flex items-center justify-between gap-2">
@@ -454,16 +439,16 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                         <XCircle size={15} className="text-red-650" />
                         טעות מסוג I
                       </span>
-                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 font-mono" dir="ltr">α (Alpha)</span>
+                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400" dir="ltr">α (Alpha)</span>
                     </div>
-                    <div className="text-2xl sm:text-3xl font-black mt-2 text-red-700 dark:text-red-300 font-mono">
+                    <div className="text-2xl sm:text-3xl font-black mt-2 text-red-700 dark:text-red-300">
                       {(alpha * 100).toFixed(1)}%
                     </div>
                     <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
                       רמת המובהקות – הסיכוי לדחות בטעות את השערת האפס הנכונה, כלומר לטעון לקשר או אפקט שאינו קיים באמת.
                     </p>
                   </td>
-
+ 
                   {/* Cell 2-2: Reject H0 and H1 is true => Correct decision Power! */}
                   <td className="p-4 sm:p-5 bg-gradient-to-br from-indigo-50/30 to-emerald-50/30 dark:from-indigo-950/10 dark:to-emerald-950/10 hover:from-indigo-50/45 hover:to-emerald-50/45 dark:hover:from-indigo-950/15 dark:hover:to-emerald-950/15 transition-all">
                     <div className="flex items-center justify-between gap-2">
@@ -471,9 +456,9 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                         <CheckCircle size={15} className="text-indigo-600 dark:text-indigo-405" />
                         החלטה נכונה (עוצמה)
                       </span>
-                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 font-mono" dir="ltr">1 - β (Power)</span>
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400" dir="ltr">1 - β (Power)</span>
                     </div>
-                    <div className="text-2xl sm:text-3xl font-black mt-2 text-indigo-700 dark:text-indigo-400 tracking-tight font-mono">
+                    <div className="text-2xl sm:text-3xl font-black mt-2 text-indigo-700 dark:text-indigo-400 tracking-tight">
                       {(stats.power * 100).toFixed(2)}%
                     </div>
                     <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
@@ -508,7 +493,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                   <span className="w-2.5 h-2.5 rounded-full bg-red-600 shrink-0" />
                   טעות מסוג ראשון (<InlineMath math="\alpha" />)
                 </span>
-                <div className="text-2xl sm:text-3xl lg:text-2xl xl:text-3xl font-black mt-2 text-red-700 dark:text-red-400 font-mono tracking-tight break-all">
+                <div className="text-2xl sm:text-3xl lg:text-2xl xl:text-3xl font-black mt-2 text-red-700 dark:text-red-400 tracking-tight break-all">
                   {(alpha * 100).toFixed(1)}%
                 </div>
                 <span className="text-[10px] sm:text-xs text-slate-700 dark:text-slate-300 font-bold block mt-2 leading-tight">רמת מובהקות המבחן המקורית</span>
@@ -521,7 +506,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-600 animate-pulse shrink-0" />
                   טעות מסוג שני (<InlineMath math="\beta" />)
                 </span>
-                <div className="text-2xl sm:text-3xl lg:text-2xl xl:text-3xl font-black mt-2 text-amber-700 dark:text-amber-400 font-mono tracking-tight break-all">
+                <div className="text-2xl sm:text-3xl lg:text-2xl xl:text-3xl font-black mt-2 text-amber-700 dark:text-amber-400 tracking-tight break-all">
                   {(stats.beta * 100).toFixed(2)}%
                 </div>
                 <span className="text-[10px] sm:text-xs text-slate-700 dark:text-slate-300 font-bold block mt-2 leading-tight">הסיכוי לקבלת H₀ מוטעית</span>
@@ -533,7 +518,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                     <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping shrink-0" />
                     עוצמת המבחן (<InlineMath math="1-\beta" />)
                   </span>
-                  <div className="text-2xl sm:text-3xl lg:text-2xl xl:text-3xl font-black mt-2 tracking-tight font-mono break-all">
+                  <div className="text-2xl sm:text-3xl lg:text-2xl xl:text-3xl font-black mt-2 tracking-tight break-all">
                     {(stats.power * 100).toFixed(2)}%
                   </div>
                 </div>
@@ -547,7 +532,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                   <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 shrink-0" />
                   שגיאת תקן (<InlineMath math="SE" />)
                 </span>
-                <div className="text-2xl sm:text-3xl lg:text-2xl xl:text-3xl font-black mt-2 text-indigo-700 dark:text-indigo-400 font-mono tracking-tight break-all">
+                <div className="text-2xl sm:text-3xl lg:text-2xl xl:text-3xl font-black mt-2 text-indigo-700 dark:text-indigo-400 tracking-tight break-all">
                   {stats.se.toFixed(4)}
                 </div>
                 <span className="text-[10px] sm:text-xs text-slate-700 dark:text-slate-300 font-bold block mt-2 leading-tight">סטיית התקן של הסטטיסטי</span>
@@ -555,6 +540,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
 
             </div>
           )}
+
 
           {/* Overlapping Curves Chart */}
           <div className={`rounded-3xl p-6 md:p-8 border shadow-md transition-all ${
