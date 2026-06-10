@@ -109,13 +109,13 @@ function DecisionMatrix({ theme, isValid, stats, alpha }: DecisionMatrixProps) {
   if (!isValid || !stats) {
     return (
       <div className="py-12 text-center text-slate-500 font-bold text-sm">
-        נא להזין ערכי קלט תקינים להצגת מטריצת החלטה מלאה ומפורטת.
+        נא להזין ערכי קלט תקינים להצגת מטריצת החלטה...
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-55 dark:bg-slate-950/25">
+    <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/25">
       <table className="w-full text-sm text-right border-collapse">
         <thead>
           <tr className="bg-slate-100/70 dark:bg-slate-800/70 text-xs text-slate-800 dark:text-slate-300 font-extrabold border-b border-slate-200 dark:border-slate-800">
@@ -136,12 +136,12 @@ function DecisionMatrix({ theme, isValid, stats, alpha }: DecisionMatrixProps) {
             <td className="p-4 sm:p-5 border-l border-slate-200 dark:border-slate-800 bg-emerald-50/20 dark:bg-emerald-950/10 hover:bg-emerald-50/35 dark:hover:bg-emerald-950/20 transition-all">
               <div className="flex items-center justify-between gap-2">
                 <span className="font-extrabold text-emerald-800 dark:text-emerald-400 flex items-center gap-1.5 text-xs sm:text-sm">
-                  <CheckCircle size={15} className="text-emerald-600 dark:text-emerald-450" />
+                  <CheckCircle size={15} className="text-emerald-600 dark:text-emerald-400" />
                   החלטה נכונה
                 </span>
                 <span className="text-xs font-bold text-slate-500 dark:text-slate-400" dir="ltr">1 - α</span>
               </div>
-              <div className="text-2xl sm:text-3xl font-black mt-2 text-emerald-850 dark:text-emerald-300">
+              <div className="text-2xl sm:text-3xl font-black mt-2 text-emerald-800 dark:text-emerald-300">
                 {((1 - alpha) * 100).toFixed(1)}%
               </div>
               <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
@@ -158,10 +158,10 @@ function DecisionMatrix({ theme, isValid, stats, alpha }: DecisionMatrixProps) {
                 </span>
                 <span className="text-xs font-semibold text-slate-500 dark:text-slate-400" dir="ltr">β (Beta)</span>
               </div>
-              <div className="text-2xl sm:text-3xl font-black mt-2 text-amber-750 dark:text-amber-305">
+              <div className="text-2xl sm:text-3xl font-black mt-2 text-amber-700 dark:text-amber-300">
                 {(stats.beta * 100).toFixed(2)}%
               </div>
-              <p className="text-[11px] text-slate-605 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
                 קבלת השערת האפס אף על פי שהיא שקרית – החמצת גילוי של אפקט או הבדל קיים במציאות.
               </p>
             </td>
@@ -178,7 +178,7 @@ function DecisionMatrix({ theme, isValid, stats, alpha }: DecisionMatrixProps) {
             <td className="p-4 sm:p-5 border-l border-slate-200 dark:border-slate-800 bg-red-50/20 dark:bg-red-950/10 hover:bg-red-50/35 dark:hover:bg-red-950/20 transition-all">
               <div className="flex items-center justify-between gap-2">
                 <span className="font-extrabold text-red-700 dark:text-red-400 flex items-center gap-1.5 text-xs sm:text-sm">
-                  <XCircle size={15} className="text-red-655" />
+                  <XCircle size={15} className="text-red-600" />
                   טעות מסוג I
                 </span>
                 <span className="text-xs font-semibold text-slate-500 dark:text-slate-400" dir="ltr">α (Alpha)</span>
@@ -195,7 +195,7 @@ function DecisionMatrix({ theme, isValid, stats, alpha }: DecisionMatrixProps) {
             <td className="p-4 sm:p-5 bg-gradient-to-br from-indigo-50/30 to-emerald-50/30 dark:from-indigo-950/10 dark:to-emerald-950/10 hover:from-indigo-50/45 hover:to-emerald-50/45 dark:hover:from-indigo-950/15 dark:hover:to-emerald-950/15 transition-all">
               <div className="flex items-center justify-between gap-2">
                 <span className="font-extrabold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5 text-xs sm:text-sm">
-                  <CheckCircle size={15} className="text-indigo-600 dark:text-indigo-405" />
+                  <CheckCircle size={15} className="text-indigo-600 dark:text-indigo-400" />
                   החלטה נכונה (עוצמה)
                 </span>
                 <span className="text-xs font-bold text-slate-500 dark:text-slate-400" dir="ltr">1 - β (Power)</span>
@@ -203,7 +203,7 @@ function DecisionMatrix({ theme, isValid, stats, alpha }: DecisionMatrixProps) {
               <div className="text-2xl sm:text-3xl font-black mt-2 text-indigo-700 dark:text-indigo-400 tracking-tight">
                 {(stats.power * 100).toFixed(2)}%
               </div>
-              <p className="text-[11px] text-slate-605 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
                 עוצמת המבחן – ההסתברות של המחקר לזהות ולדחות השערה מוטעית, ובכך להוכיח את קיומו של אפקט אמיתי.
               </p>
             </td>
@@ -281,6 +281,59 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
 
   const [testType, setTestType] = useState<TestType>('mean');
   const [tailType, setTailType] = useState<TailType>('right');
+
+  // Dynamic parameterized formal hypothesis
+  const getFormalHypothesisMath = () => {
+    let parameterSymbol = '\\mu';
+    let h0Val = mu0Input;
+
+    if (testType === 'sum') {
+      parameterSymbol = 'E(\\sum X)';
+      const parsedMu0 = parseFloat(mu0Input);
+      const parsedN = parseInt(nInput, 10);
+      if (!isNaN(parsedMu0) && !isNaN(parsedN)) {
+        h0Val = (parsedN * parsedMu0).toString();
+      } else {
+        h0Val = 'n \\cdot \\mu_0';
+      }
+    }
+
+    let h0Symbol = '=';
+    let h1Symbol = '\\neq';
+
+    if (tailType === 'right') {
+      h0Symbol = '\\le';
+      h1Symbol = '>';
+    } else if (tailType === 'left') {
+      h0Symbol = '\\ge';
+      h1Symbol = '<';
+    }
+
+    return `H_0: ${parameterSymbol} ${h0Symbol} ${h0Val} \\quad \\text{vs.} \\quad H_1: ${parameterSymbol} ${h1Symbol} ${h0Val}`;
+  };
+
+  // Dynamic theoretical (general) formal hypothesis
+  const getGeneralFormalHypothesisMath = () => {
+    let parameterSymbol = '\\mu';
+    if (testType === 'sum') {
+      parameterSymbol = 'E(\\sum X)';
+    }
+
+    const nullValueSymbol = testType === 'sum' ? 'n \\cdot \\mu_0' : '\\mu_0';
+
+    let h0Symbol = '=';
+    let h1Symbol = '\\neq';
+
+    if (tailType === 'right') {
+      h0Symbol = '\\le';
+      h1Symbol = '>';
+    } else if (tailType === 'left') {
+      h0Symbol = '\\ge';
+      h1Symbol = '<';
+    }
+
+    return `H_0: ${parameterSymbol} ${h0Symbol} ${nullValueSymbol} \\quad \\text{vs.} \\quad H_1: ${parameterSymbol} ${h1Symbol} ${nullValueSymbol}`;
+  };
 
   // Accordion state
   const [showSteps, setShowSteps] = useState<boolean>(true);
@@ -584,111 +637,181 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
           </div>
         </div>
 
-        {/* Inputs Layout columns: U0, STD, Size, U1, Test, Alpha */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 items-start" dir="ltr">
-          
-          {/* 1. U0 Input */}
-          <div className="space-y-1.5 text-right font-sans" dir="rtl">
-            <div className="flex justify-between items-center px-0.5">
-              <InputTooltip content="תוחלת אוכלוסיית הבסיס (השערת האפס H₀)" theme={theme}>
-                <label className="text-[12px] sm:text-xs font-black text-slate-500 dark:text-slate-400 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700 ml-1">תוחלת (μ₀):</label>
-              </InputTooltip>
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 font-bold">H0</span>
+        {/* Custom Parameters Table Layout */}
+        <div className="overflow-hidden rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all mb-6" dir="rtl">
+          {/* Table Header Row */}
+          <div className="grid grid-cols-2 text-center text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-200 border-b border-slate-300 dark:border-slate-800">
+            <div className="py-2.5 bg-slate-50 dark:bg-slate-800/40 border-l border-slate-300 dark:border-slate-800 text-slate-900 dark:text-slate-100">
+              מדגם
             </div>
-            <input 
-              type="text" 
-              value={mu0Input}
-              onChange={(e) => handleMu0Change(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl outline-none transition-all font-mono font-bold text-sm text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 text-left"
-              placeholder="100"
-              dir="ltr"
-            />
-            {errors.mu0 && <p className="text-[11px] text-red-655 dark:text-red-400 font-bold leading-tight mt-1">{errors.mu0}</p>}
+            <div className="py-2.5 bg-slate-50 dark:bg-slate-800/40 text-slate-900 dark:text-slate-100">
+              אוכלוסייה
+            </div>
           </div>
 
-          {/* 2. STD Input (σ) */}
-          <div className="space-y-1.5 text-right font-sans" dir="rtl">
-            <div className="flex justify-between items-center px-0.5">
-              <InputTooltip content="מדד הפיזור של הערכים סביב הממוצע (חייב להיות חיובי וגדול מ-0)" theme={theme}>
-                <label className="text-[12px] sm:text-xs font-black text-slate-500 dark:text-slate-400 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700 ml-1">סטיית תקן (σ):</label>
-              </InputTooltip>
+          {/* Table Body - Row 1 */}
+          <div className="grid grid-cols-2 border-b border-slate-200 dark:border-slate-800/80">
+            {/* Left side: Sample - n */}
+            <div className="flex flex-col sm:flex-row items-stretch border-l border-slate-350 dark:border-slate-800/80">
+              <div className="w-full sm:w-1/2 px-4 py-3 bg-slate-50/20 dark:bg-slate-950/20 flex items-center justify-between sm:justify-start gap-1">
+                <InputTooltip content="מספר התצפיות במדגם (n)" theme={theme}>
+                  <label className={`text-xs font-black text-slate-600 dark:text-slate-300 cursor-help border-b border-dotted border-slate-400 dark:border-slate-500 ml-1 ${testType === 'single' ? 'opacity-30' : ''}`}>
+                    גודל מדגם (n):
+                  </label>
+                </InputTooltip>
+              </div>
+              <div className="w-full sm:w-1/2 flex flex-col justify-center bg-transparent">
+                <input 
+                  type="text" 
+                  value={testType === 'single' ? '1' : nInput}
+                  disabled={testType === 'single'}
+                  onChange={(e) => handleNChange(e.target.value)}
+                  className={`w-full px-4 py-3 font-mono font-bold text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 bg-transparent outline-none transition-all ${
+                    testType === 'single' ? 'opacity-40 cursor-not-allowed bg-slate-100/10' : 'focus:bg-indigo-50/10 dark:focus:bg-indigo-950/10'
+                  } ${errors.n && testType !== 'single' ? 'bg-red-500/5 text-red-600 dark:text-red-400' : ''}`}
+                  placeholder="36"
+                  dir="ltr"
+                />
+                {errors.n && testType !== 'single' && (
+                  <div className="px-4 pb-1.5 text-[11px] text-red-600 dark:text-red-400 font-bold leading-tight">{errors.n}</div>
+                )}
+              </div>
             </div>
-            <input 
-              type="text" 
-              value={sigmaInput}
-              onChange={(e) => handleSigmaChange(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/85 border border-slate-300 dark:border-slate-700/80 rounded-xl outline-none transition-all font-mono font-bold text-sm text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-505 text-left"
-              placeholder="15"
-              dir="ltr"
-            />
-            {errors.sigma && <p className="text-[11px] text-red-655 dark:text-red-400 font-bold leading-tight mt-1">{errors.sigma}</p>}
+
+            {/* Right side: Population - mu0 */}
+            <div className="flex flex-col sm:flex-row items-stretch">
+              <div className="w-full sm:w-1/2 px-4 py-3 bg-slate-50/20 dark:bg-slate-950/20 flex items-center justify-between sm:justify-start gap-1">
+                <InputTooltip content="תוחלת אוכלוסיית הבסיס (השערת האפס H₀)" theme={theme}>
+                  <label className="text-xs font-black text-slate-600 dark:text-slate-300 cursor-help border-b border-dotted border-slate-400 dark:border-slate-500 ml-1">
+                    תוחלת (μ₀):
+                  </label>
+                </InputTooltip>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 font-bold">H0</span>
+              </div>
+              <div className="w-full sm:w-1/2 flex flex-col justify-center">
+                 <input 
+                  type="text" 
+                  value={mu0Input}
+                  onChange={(e) => handleMu0Change(e.target.value)}
+                  className={`w-full px-4 py-3 font-mono font-bold text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 bg-transparent outline-none transition-all focus:bg-indigo-50/10 dark:focus:bg-indigo-950/10 ${
+                    errors.mu0 ? 'bg-red-500/5 text-red-600 dark:text-red-400 mr-0.5' : ''
+                  }`}
+                  placeholder="100"
+                  dir="ltr"
+                />
+                {errors.mu0 && (
+                  <div className="px-4 pb-1.5 text-[11px] text-red-600 dark:text-red-400 font-bold leading-tight">{errors.mu0}</div>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* 3. Size Input (n) */}
-          <div className="space-y-1.5 text-right font-sans" dir="rtl">
-            <div className="flex justify-between items-center px-0.5">
-              <InputTooltip content="מספר התצפיות במדגם (n)" theme={theme}>
-                <label className={`text-[12px] sm:text-xs font-black text-slate-500 dark:text-slate-400 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700 ml-1 ${testType === 'single' ? 'opacity-30' : ''}`}>גודל המדגם (n):</label>
-              </InputTooltip>
+          {/* Table Body - Row 2 */}
+          <div className="grid grid-cols-2">
+            {/* Left side: Sample - mu1 (X̄ in visual) */}
+            <div className="flex flex-col sm:flex-row items-stretch border-l border-slate-350 dark:border-slate-800/80">
+              <div className="w-full sm:w-1/2 px-4 py-3 bg-slate-50/20 dark:bg-slate-950/20 flex items-center justify-between sm:justify-start gap-1">
+                <InputTooltip content="התוחלת המשוערת תחת השערת המחקר (האלטרנטיבה H₁) או ממוצע המדגם" theme={theme}>
+                  <label className="text-xs font-black text-slate-600 dark:text-slate-300 cursor-help border-b border-dotted border-slate-400 dark:border-slate-500 ml-1">
+                    ממוצע מדגם (X̄):
+                  </label>
+                </InputTooltip>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-amber-650 dark:text-amber-400 font-bold">H1</span>
+              </div>
+              <div className="w-full sm:w-1/2 flex flex-col justify-center">
+                 <input 
+                  type="text" 
+                  value={mu1Input}
+                  onChange={(e) => handleMu1Change(e.target.value)}
+                  className={`w-full px-4 py-3 font-mono font-bold text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 bg-transparent outline-none transition-all focus:bg-indigo-50/10 dark:focus:bg-indigo-950/10 ${
+                    errors.mu1 ? 'bg-red-500/5 text-red-600 dark:text-red-400 mr-0.5' : ''
+                  }`}
+                  placeholder="108"
+                  dir="ltr"
+                />
+                {errors.mu1 && (
+                  <div className="px-4 pb-1.5 text-[11px] text-red-600 dark:text-red-400 font-bold leading-tight">{errors.mu1}</div>
+                )}
+              </div>
             </div>
-            <input 
-              type="text" 
-              value={testType === 'single' ? '1' : nInput}
-              disabled={testType === 'single'}
-              onChange={(e) => handleNChange(e.target.value)}
-              className={`w-full px-3 py-2 border rounded-xl outline-none transition-all font-mono font-bold text-sm text-slate-900 dark:text-slate-100 text-left ${
-                testType === 'single'
-                  ? 'bg-slate-100 dark:bg-slate-800/20 text-slate-400 border-transparent opacity-50 cursor-not-allowed'
-                  : 'bg-slate-55 dark:bg-slate-800/80 border-slate-300 dark:border-slate-700/80 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500'
-              } ${errors.n && testType !== 'single' ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' : 'border-slate-300 dark:border-slate-700/80'}`}
-              placeholder="36"
-              dir="ltr"
-            />
-            {errors.n && testType !== 'single' && <p className="text-[11px] text-red-655 dark:text-red-400 font-bold leading-tight mt-1">{errors.n}</p>}
+
+            {/* Right side: Population - sigma */}
+            <div className="flex flex-col sm:flex-row items-stretch">
+              <div className="w-full sm:w-1/2 px-4 py-3 bg-slate-50/20 dark:bg-slate-950/20 flex items-center justify-between sm:justify-start gap-1">
+                <InputTooltip content="מדד הפיזור של הערכים סביב הממוצע (חייב להיות חיובי וגדול מ-0)" theme={theme}>
+                  <label className="text-xs font-black text-slate-600 dark:text-slate-300 cursor-help border-b border-dotted border-slate-400 dark:border-slate-500 ml-1">
+                    סטיית תקן (σ):
+                  </label>
+                </InputTooltip>
+              </div>
+              <div className="w-full sm:w-1/2 flex flex-col justify-center">
+                 <input 
+                  type="text" 
+                  value={sigmaInput}
+                  onChange={(e) => handleSigmaChange(e.target.value)}
+                  className={`w-full px-4 py-3 font-mono font-bold text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 bg-transparent outline-none transition-all focus:bg-indigo-50/10 dark:focus:bg-indigo-950/10 ${
+                    errors.sigma ? 'bg-red-500/5 text-red-600 dark:text-red-400' : ''
+                  }`}
+                  placeholder="15"
+                  dir="ltr"
+                />
+                {errors.sigma && (
+                  <div className="px-4 pb-1.5 text-[11px] text-red-600 dark:text-red-400 font-bold leading-tight">{errors.sigma}</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Dynamic Formal Hypotheses Display Banner */}
+        <div className="mb-6 p-4 rounded-2xl border border-indigo-150/80 dark:border-indigo-900/40 bg-indigo-50/30 dark:bg-indigo-950/10 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all" dir="rtl">
+          <div>
+            <h4 className="text-sm font-black text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
+              <Award size={16} className="text-indigo-500" />
+              השערות המבחן בצורה הפורמלית (Formal Hypotheses):
+            </h4>
+            <span className="text-xs text-slate-500 dark:text-slate-400 block mt-1 leading-normal font-medium max-w-lg">
+              קביעת השערת האפס (<InlineMath math="H_0" />) המבטאת חוסר שינוי, למול השערת המחקר אלטרנטיבית (<InlineMath math="H_1" />) המבטאת אפקט משמעותי.
+            </span>
           </div>
 
-          {/* 4. U1 Input (Expectation alternative H1) */}
-          <div className="space-y-1.5 text-right font-sans" dir="rtl">
-            <div className="flex justify-between items-center px-0.5">
-              <InputTooltip content="התוחלת המשוערת תחת השערת המחקר (האלטרנטיבה H₁)" theme={theme}>
-                <label className="text-[12px] sm:text-xs font-black text-slate-500 dark:text-slate-400 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700 ml-1">תוחלת (μ₁):</label>
-              </InputTooltip>
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-amber-600 dark:text-amber-400 font-bold">H1</span>
+          <div className="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-950/90 border border-slate-200/80 dark:border-slate-800 rounded-xl min-w-[210px] text-center shadow-sm">
+            <span className="text-[10px] font-bold text-indigo-650 dark:text-indigo-400 uppercase tracking-wider mb-1">השערות המבחן הפורמליות:</span>
+            <div className="text-sm sm:text-base font-extrabold text-slate-800 dark:text-slate-100 font-mono tracking-wide" dir="ltr">
+              <InlineMath math={getFormalHypothesisMath()} />
             </div>
-            <input 
-              type="text" 
-              value={mu1Input}
-              onChange={(e) => handleMu1Change(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl outline-none transition-all font-mono font-bold text-sm text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 text-left"
-              placeholder="108"
-              dir="ltr"
-            />
-            {errors.mu1 && <p className="text-[11px] text-red-655 dark:text-red-400 font-bold leading-tight mt-1">{errors.mu1}</p>}
+            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-1.5 border-t border-dotted border-slate-200 dark:border-slate-800 pt-1" dir="ltr">
+              <InlineMath math={getGeneralFormalHypothesisMath()} />
+            </div>
           </div>
+        </div>
 
-          {/* 5. Test Direction select */}
-          <div className="space-y-1.5 text-right font-sans" dir="rtl">
+        {/* Test Direction and Alpha Below Table */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6" dir="rtl">
+          {/* Test Direction select */}
+          <div className="space-y-1.5 text-right font-sans">
             <div className="flex justify-between items-center px-0.5">
               <InputTooltip content="כיוון השערת המחקר (H₁) - חד-צדדית או דו-צדדית" theme={theme}>
-                <label className="text-[12px] sm:text-xs font-black text-slate-500 dark:text-slate-400 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700 ml-1">השערת המחקר (H₁):</label>
+                <label className="text-xs font-black text-slate-600 dark:text-slate-300 cursor-help border-b border-dotted border-slate-400 dark:border-slate-500 ml-1">השערת המחקר (H₁):</label>
               </InputTooltip>
             </div>
             <select 
               value={tailType}
               onChange={(e) => setTailType(e.target.value as TailType)}
-              className="w-full px-2 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl outline-none font-bold text-slate-800 dark:text-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500"
+              className="w-full px-3 py-2.5 text-xs bg-[#070d33] border border-slate-300 dark:border-slate-800 rounded-xl outline-none font-bold text-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500"
+              style={{ backgroundColor: '#070d33' }}
             >
-              <option value="right">חד-צדדי ימני (μ &gt; μ₀)</option>
-              <option value="left">חד-צדדי שמאלי (μ &lt; μ₀)</option>
-              <option value="two-tailed">דו-צדדי (μ ≠ μ₀)</option>
+              <option value="right" className="bg-[#070d33] text-white">חד-צדדי ימני (μ &gt; μ₀)</option>
+              <option value="left" className="bg-[#070d33] text-white">חד-צדדי שמאלי (μ &lt; μ₀)</option>
+              <option value="two-tailed" className="bg-[#070d33] text-white">דו-צדדי (μ ≠ μ₀)</option>
             </select>
           </div>
 
-          {/* 6. Alpha Input & Presets */}
-          <div className="space-y-1.5 text-right font-sans" dir="rtl">
+          {/* Alpha Input & Presets */}
+          <div className="space-y-1.5 text-right font-sans">
             <div className="flex justify-between items-center px-0.5">
               <InputTooltip content="רמת מובהקות (α) - ההסתברות המרבית לכל היותר לדחות בטעות את השערת האפס" theme={theme}>
-                <label className="text-[12px] sm:text-xs font-black text-slate-500 dark:text-slate-400 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700 ml-1">מובהקות (α):</label>
+                <label className="text-xs font-black text-slate-600 dark:text-slate-300 cursor-help border-b border-dotted border-slate-400 dark:border-slate-500 ml-1">מובהקות (α):</label>
               </InputTooltip>
             </div>
             <div className="flex gap-1" dir="ltr">
@@ -696,11 +819,12 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                 type="text" 
                 value={alphaInput}
                 onChange={(e) => handleAlphaChange(e.target.value)}
-                className={`w-14 px-1 py-2 bg-slate-50 dark:bg-slate-800/80 border rounded-xl outline-none transition-all font-mono font-bold text-xs text-slate-900 dark:text-slate-100 ${
+                className={`w-14 px-1 py-2.5 bg-[#070d33] text-center border rounded-xl outline-none transition-all font-mono font-bold text-xs text-white ${
                   errors.alpha 
                     ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' 
-                    : 'border-slate-300 dark:border-slate-700/80 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500'
+                    : 'border-slate-300 dark:border-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-505'
                 }`}
+                style={{ backgroundColor: '#070d33', textAlign: 'center' }}
                 placeholder="0.05"
               />
               <div className="flex-1 grid grid-cols-3 gap-0.5">
@@ -709,7 +833,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                     key={pVal}
                     type="button"
                     onClick={() => applyAlphaPreset(pVal)}
-                    className={`py-1 text-[9px] font-black rounded-lg transition-all border ${
+                    className={`py-1 text-[15px] font-black rounded-lg transition-all border ${
                       alpha === pVal 
                         ? 'bg-indigo-600 text-white border-indigo-700 shadow-sm'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750'
@@ -720,10 +844,10 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                 ))}
               </div>
             </div>
-            {errors.alpha && <p className="text-[11px] text-red-655 dark:text-red-400 font-bold leading-tight mt-1">{errors.alpha}</p>}
+            {errors.alpha && <p className="text-[11px] text-red-600 dark:text-red-400 font-bold leading-tight mt-1">{errors.alpha}</p>}
           </div>
-
         </div>
+
       </div>
 
       {/* Main Grid Layout */}
@@ -970,7 +1094,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="py-24 text-center text-red-650 font-black text-lg md:text-xl">
+              <div className="py-24 text-center text-red-650 dark:text-red-400 font-black text-lg md:text-xl">
                 נא לתקן את שגיאות הקלטים בצד ימין על מנת להציג את הגרף.
               </div>
             )}
@@ -1191,7 +1315,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
       <div className="mt-8 rounded-3xl border p-5 md:p-6 text-right relative overflow-hidden shadow-lg transition-all bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-800">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-red-600 via-indigo-700 to-emerald-600" />
         
-        <h3 className="text-base sm:text-lg font-black mb-4 flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 text-slate-905 dark:text-slate-100">
+        <h3 className="text-base sm:text-lg font-black mb-4 flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 text-slate-900 dark:text-slate-100">
           <Award size={18} className="text-emerald-500" />
           מטריצת החלטה ורמות מובהקות (ארבעת מצבי עולם הסקה סטטיסטית)
         </h3>
