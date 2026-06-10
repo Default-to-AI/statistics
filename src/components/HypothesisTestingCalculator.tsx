@@ -547,7 +547,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
     // 1. Calculate Standard Error (SE) based on Test Type and CLT
     let se = sigma;
     let effectH0Mean = mu0;
-    let effectH1Mean = mu1;
+    let effectH1Mean = mu1; // Explicitly uses mu1, decoupled from xBar
 
     if (testType === 'mean') {
       se = sigma / Math.sqrt(n);
@@ -565,43 +565,43 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
     }
 
     const df = testType === 'single' ? 1 : Math.max(1, n - 1);
+    
+    // Non-Centrality Parameter calculation
     const ncp = (effectH1Mean - effectH0Mean) / se;
 
-    // 2. Critical Value(s) computation based on Alpha under H0 standard distribution
-    let c1: number = 0; // lower (used in two-tailed)
-    let c2: number = 0; // upper (used in right-tail/two-tail/left-tail)
+    // 2. Critical Score Sourcing & Distribution Mapping
     let zCrit: number = 0;
-    let zCritLower: number = 0;
+    let zCritLower: number = 0; // for two-tailed
 
     if (varianceKnown) {
       if (tailType === 'right') {
         zCrit = inverseNormalCDF(1 - alpha);
-        c2 = effectH0Mean + zCrit * se;
       } else if (tailType === 'left') {
-        zCrit = inverseNormalCDF(alpha);
-        c2 = effectH0Mean + zCrit * se;
+        zCrit = inverseNormalCDF(alpha); // This will be negative
       } else { // two-tailed
         zCrit = inverseNormalCDF(1 - alpha / 2);
         zCritLower = -zCrit;
-        c1 = effectH0Mean - zCrit * se;
-        c2 = effectH0Mean + zCrit * se;
       }
     } else {
       if (tailType === 'right') {
         zCrit = studentTPPF(1 - alpha, df);
-        c2 = effectH0Mean + zCrit * se;
       } else if (tailType === 'left') {
         zCrit = studentTPPF(alpha, df);
-        c2 = effectH0Mean + zCrit * se;
       } else { // two-tailed
         zCrit = studentTPPF(1 - alpha / 2, df);
         zCritLower = -zCrit;
-        c1 = effectH0Mean - zCrit * se;
-        c2 = effectH0Mean + zCrit * se;
       }
     }
 
-    // 3. Power (1-Beta) calculations based on H1 distribution
+    // Single Boundary Calculation Engine
+    let c2: number = effectH0Mean + zCrit * se;
+    let c1: number = tailType === 'two-tailed' ? effectH0Mean + zCritLower * se : 0;
+    
+    const C_bar_value = tailType === 'two-tailed' ? c2 : c2; // primary boundary
+    const C_bar_value_1 = c1;
+    const C_bar_value_2 = c2;
+
+    // 3. Non-Central Risk & Power Evaluation
     let beta = 0;
     let power = 0;
 
@@ -618,17 +618,13 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
       }
     } else {
       if (tailType === 'right') {
-        const tBeta = zCrit - ncp;
-        beta = studentTCDF(tBeta, df);
+        beta = studentTCDF(zCrit - ncp, df);
         power = 1 - beta;
       } else if (tailType === 'left') {
-        const tBeta = zCrit - ncp;
-        beta = 1 - studentTCDF(tBeta, df);
+        beta = 1 - studentTCDF(zCrit - ncp, df); // Using exact area map
         power = 1 - beta;
       } else { // two-tailed
-        const tBetaLower = -zCrit - ncp;
-        const tBetaUpper = zCrit - ncp;
-        beta = studentTCDF(tBetaUpper, df) - studentTCDF(tBetaLower, df);
+        beta = studentTCDF(zCrit - ncp, df) - studentTCDF(zCritLower - ncp, df);
         power = 1 - beta;
       }
     }
@@ -643,6 +639,9 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
       effectH1Mean,
       c1,
       c2,
+      C_bar_value,
+      C_bar_value_1,
+      C_bar_value_2,
       zCrit,
       zCritLower,
       beta,
@@ -652,6 +651,68 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
       varianceKnown
     };
   }, [mu0, mu1, sigma, n, alpha, testType, tailType, isValid, varianceKnown]);
+
+  // --- Dynamic Decision Data Logic ---
+  const decisionData = useMemo(() => {
+    if (!stats || !isValid) return null;
+
+    // We decouple xBar from mu1, by defining xBar variable which will eventually be bound to a separate state.
+    // For now we use the existing mu1 state as the xBar fallback until we add the xBar state, but the calculation is completely isolated.
+    const xBarValue = mu1; 
+    
+    let isReject = false;
+    let ruleText = '';
+    let decisionHeading = '';
+    let belongingExplanationText = '';
+    
+    // Formal Structural Set Compilation using purely C and \bar{C}
+    let zoneRejectionTeX = '';
+    let zoneAcceptanceTeX = '';
+
+    const formattedXBar = xBarValue.toFixed(xBarValue % 1 === 0 ? 0 : 3);
+
+    if (tailType === 'right') {
+      isReject = xBarValue >= stats.C_bar_value;
+      zoneRejectionTeX = `C = \\{ \\bar{X} \\mid \\bar{X} \\ge ${stats.C_bar_value.toFixed(4)} \\}`;
+      zoneAcceptanceTeX = `\\bar{C} = \\{ \\bar{X} \\mid \\bar{X} < ${stats.C_bar_value.toFixed(4)} \\}`;
+    } else if (tailType === 'left') {
+      isReject = xBarValue <= stats.C_bar_value;
+      zoneRejectionTeX = `C = \\{ \\bar{X} \\mid \\bar{X} \\le ${stats.C_bar_value.toFixed(4)} \\}`;
+      zoneAcceptanceTeX = `\\bar{C} = \\{ \\bar{X} \\mid \\bar{X} > ${stats.C_bar_value.toFixed(4)} \\}`;
+    } else { // two-tailed
+      isReject = xBarValue <= stats.C_bar_value_1 || xBarValue >= stats.C_bar_value_2;
+      zoneRejectionTeX = `C = \\{ \\bar{X} \\mid \\bar{X} \\le ${stats.C_bar_value_1.toFixed(4)} \\lor \\bar{X} \\ge ${stats.C_bar_value_2.toFixed(4)} \\}`;
+      zoneAcceptanceTeX = `\\bar{C} = \\{ \\bar{X} \\mid ${stats.C_bar_value_1.toFixed(4)} < \\bar{X} < ${stats.C_bar_value_2.toFixed(4)} \\}`;
+    }
+
+    if (isReject) {
+      decisionHeading = 'Reject H_0';
+      belongingExplanationText = `מכיוון שממוצע המדגם בפועל הוא X̄ = ${formattedXBar}, הוא שייך לקבוצה C.`;
+    } else {
+      decisionHeading = 'Do Not Reject H_0';
+      belongingExplanationText = `מכיוון שממוצע המדגם בפועל הוא X̄ = ${formattedXBar}, הוא שייך לקבוצה \\bar{C}.`;
+    }
+
+    let verbalConclusion = '';
+    const comparisonText = tailType === 'right' ? `גדולה מ-${mu0}` : tailType === 'left' ? `קטנה מ-${mu0}` : `שונה מ-${mu0}`;
+    
+    if (isReject) {
+      verbalConclusion = `ברמת מובהקות של ${alpha}, קיימות ראיות סטטיסטיות מספקות המבוססות על המדגם כדי לדחות את השערת האפס ולקבוע כי תוחלת האוכלוסייה ${comparisonText}.`;
+    } else {
+      verbalConclusion = `ברמת מובהקות של ${alpha}, אין מספיק ראיות סטטיסטיות במדגם כדי לשלול את השערת האפס, ולכן לא ניתן לקבוע כי תוחלת האוכלוסייה ${comparisonText}.`;
+    }
+
+    return {
+      xBar: xBarValue,
+      isReject,
+      decisionHeading,
+      verbalConclusion,
+      zoneRejectionTeX,
+      zoneAcceptanceTeX,
+      belongingExplanationText,
+      formattedXBar
+    };
+  }, [stats, isValid, mu0, mu1, alpha, tailType]);
 
   // --- Dynamic Graph Data Generation ---
   const chartData = useMemo(() => {
@@ -684,7 +745,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
       if (tailType === 'right') {
         isRejected = x >= c2;
       } else if (tailType === 'left') {
-        isRejected = x <= c2; // c2 acts as the left critical line
+        isRejected = x <= c1; 
       } else { // two-tailed
         isRejected = x <= c1 || x >= c2;
       }
@@ -706,111 +767,6 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
 
     return pts;
   }, [stats, isValid, tailType]);
-
-  // --- Dynamic Decision Data Logic ---
-  const decisionData = useMemo(() => {
-    if (!stats || !isValid) return null;
-
-    const xBar = mu1;
-    const seMean = sigma / Math.sqrt(n);
-    const df = testType === 'single' ? 1 : Math.max(1, n - 1);
-    
-    const critVal = varianceKnown
-      ? (tailType === 'two-tailed' ? inverseNormalCDF(1 - alpha / 2) : inverseNormalCDF(1 - alpha))
-      : (tailType === 'two-tailed' ? studentTPPF(1 - alpha / 2, df) : studentTPPF(1 - alpha, df));
-
-    const cCrit1 = mu0 - critVal * seMean;
-    const cCrit2 = mu0 + critVal * seMean;
-    const cCrit = tailType === 'right' ? cCrit2 : cCrit1;
-
-    let isReject = false;
-    let ruleText = '';
-    let decisionHeading = '';
-
-    if (tailType === 'right') {
-      isReject = xBar >= cCrit;
-      if (isReject) {
-        ruleText = `מכיוון שממוצע המדגם גדול או שווה לערך הקריטי, כלומר התקבלה הטענה הסטטיסטית הקיצונית.`;
-        decisionHeading = 'Reject \\ H_0';
-      } else {
-        ruleText = `מכיוון שממוצע המדגם קטן מהערך הקריטי, כלומר לא התקבלה תוצאה קיצונית מספיק בשביל לדחות את הנחת היסוד.`;
-        decisionHeading = 'Do \\ Not \\ Reject \\ H_0';
-      }
-    } else if (tailType === 'left') {
-      isReject = xBar <= cCrit;
-      if (isReject) {
-        ruleText = `מכיוון שממוצע המדגם קטן או שווה לערך הקריטי, כלומר התקבלה הטענה הסטטיסטית הקיצונית.`;
-        decisionHeading = 'Reject \\ H_0';
-      } else {
-        ruleText = `מכיוון שממוצע המדגם גדול מהערך הקריטי, כלומר לא התקבלה תוצאה קיצונית מספיק בשביל לדחות את הנחת היסוד.`;
-        decisionHeading = 'Do \\ Not \\ Reject \\ H_0';
-      }
-    } else { // two-tailed
-      isReject = xBar <= cCrit1 || xBar >= cCrit2;
-      if (isReject) {
-        ruleText = `מכיוון שממוצע המדגם חורג מגבולות הקבלה, כלומר התקבלה תוצאה קיצונית העומדת בסתירה להשערת האפס.`;
-        decisionHeading = 'Reject \\ H_0';
-      } else {
-        ruleText = `מכיוון שממוצע המדגם נמצא בתוך גבולות אזור הקבלה, לא ניתן לדחות את השערת האפס.`;
-        decisionHeading = 'Do \\ Not \\ Reject \\ H_0';
-      }
-    }
-
-    let verbalConclusion = '';
-    const comparisonText = tailType === 'right' ? `גדולה מ-${mu0}` : tailType === 'left' ? `קטנה מ-${mu0}` : `שונה מ-${mu0}`;
-    
-    if (isReject) {
-      verbalConclusion = `ברמת מובהקות של ${alpha}, ישנן ראיות סטטיסטיות מספקות המבוססות על המדגם כדי לדחות את השערת האפס ולקבוע כי תוחלת האוכלוסייה ${comparisonText}.`;
-    } else {
-      verbalConclusion = `ברמת מובהקות של ${alpha}, אין מספיק ראיות סטטיסטיות במדגם כדי לשלול את השערת האפס, ולכן לא ניתן לקבוע כי התוחלת ${comparisonText}.`;
-    }
-
-    const critSymbol = varianceKnown ? 'Z_{crit}' : 't_{crit}';
-
-    // Mathematical regions and membership (cCrit)
-    const C_bar_value = tailType === 'right' ? (mu0 + critVal * seMean) : tailType === 'left' ? (mu0 - critVal * seMean) : (mu0 + critVal * seMean);
-    const C_bar_value_1 = mu0 - critVal * seMean;
-    const C_bar_value_2 = mu0 + critVal * seMean;
-
-    let zoneRejectionTeX = '';
-    let zoneAcceptanceTeX = '';
-
-    const formattedXBar = xBar.toFixed(xBar % 1 === 0 ? 0 : 3);
-
-    if (tailType === 'right') {
-      zoneRejectionTeX = `R = \\left\\{ \\bar{X} \\mid \\bar{X} \\ge ${C_bar_value.toFixed(2)} \\right\\}`;
-      zoneAcceptanceTeX = `R^c = \\left\\{ \\bar{X} \\mid \\bar{X} < ${C_bar_value.toFixed(2)} \\right\\}`;
-    } else if (tailType === 'left') {
-      zoneRejectionTeX = `R = \\left\\{ \\bar{X} \\mid \\bar{X} \\le ${C_bar_value.toFixed(2)} \\right\\}`;
-      zoneAcceptanceTeX = `R^c = \\left\\{ \\bar{X} \\mid \\bar{X} > ${C_bar_value.toFixed(2)} \\right\\}`;
-    } else { // two-tailed
-      zoneRejectionTeX = `R = \\left\\{ \\bar{X} \\mid \\bar{X} \\le ${C_bar_value_1.toFixed(2)} \\lor \\bar{X} \\ge ${C_bar_value_2.toFixed(2)} \\right\\}`;
-      zoneAcceptanceTeX = `R^c = \\left\\{ \\bar{X} \\mid ${C_bar_value_1.toFixed(2)} < \\bar{X} < ${C_bar_value_2.toFixed(2)} \\right\\}`;
-    }
-
-    const belongingExplanationText = `מכיוון שממוצע המדגם בפועל הוא X̄ = ${formattedXBar}, הוא שייך לקבוצה ${isReject ? 'R' : 'R^c'}.`;
-
-    return {
-      xBar,
-      seMean,
-      critVal,
-      cCrit,
-      cCrit1,
-      cCrit2,
-      isReject,
-      ruleText,
-      decisionHeading,
-      verbalConclusion,
-      critSymbol,
-      C_bar_value,
-      C_bar_value_1,
-      C_bar_value_2,
-      zoneRejectionTeX,
-      zoneAcceptanceTeX,
-      belongingExplanationText,
-      formattedXBar
-    };
-  }, [stats, isValid, mu0, mu1, sigma, n, alpha, tailType, varianceKnown, testType]);
 
   // Custom tooltips for graphs
   const CustomChartTooltip = ({ active, payload }: any) => {
@@ -987,12 +943,11 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
             {/* Left side: Sample - mu1 (X̄ in visual) */}
             <div className="flex flex-col sm:flex-row items-stretch border-l border-slate-350 dark:border-slate-800/80">
               <div className="w-full sm:w-1/2 px-4 py-3 bg-slate-50/20 dark:bg-slate-950/20 flex items-center justify-between sm:justify-start gap-1">
-                <InputTooltip content="התוחלת המשוערת תחת השערת המחקר (האלטרנטיבה H₁) או ממוצע המדגם" theme={theme}>
+                <InputTooltip content="ממוצע המדגם" theme={theme}>
                   <label className="text-xs font-black text-slate-600 dark:text-slate-300 cursor-help border-b border-dotted border-slate-400 dark:border-slate-500 ml-1">
                     ממוצע מדגם (X̄):
                   </label>
                 </InputTooltip>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-amber-650 dark:text-amber-400 font-bold">H1</span>
               </div>
               <div className="w-full sm:w-1/2 flex flex-col justify-center">
                  <input 
@@ -1016,7 +971,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
               <div className="w-full sm:w-1/2 px-4 py-3 bg-slate-50/20 dark:bg-slate-950/20 flex items-center justify-between sm:justify-start gap-1">
                 <InputTooltip content={varianceKnown ? "סטיית תקן של האוכלוסייה (σ)" : "סטיית תקן מדגמית (S) המשמשת כאומד לסטיית התקן של האוכלוסייה"} theme={theme}>
                   <label className="text-xs font-black text-slate-600 dark:text-slate-300 cursor-help border-b border-dotted border-slate-400 dark:border-slate-500 ml-1">
-                    {varianceKnown ? 'סטיית תקן (σ):' : 'סטיית תקן מדגמית (S):'}
+                    {varianceKnown ? 'סטיית תקן של האוכלוסייה (σ):' : 'סטיית תקן מדגמית (S):'}
                   </label>
                 </InputTooltip>
               </div>
@@ -1771,156 +1726,44 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                         </div>
                       </div>
 
-                      {/* Step 4: Statistical Decision and Formal Verdict */}
+
+                      {/* Step 4: Final Decision Block (Highlighted green/red panel) - Requirement 2 & 3 */}
                       {decisionData && (
-                        <div className="space-y-4 pt-6">
-                          <div className="flex items-center gap-3 font-extrabold text-indigo-700 dark:text-indigo-400">
-                            <span className="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-base font-black flex items-center justify-center border border-indigo-300">4</span>
-                            <span className="text-xl sm:text-2xl font-black">שלב ההכרעה הסטטיסטית והמסקנה המחקרית</span>
-                          </div>
+                        <div className={`mt-8 rounded-3xl p-6 md:p-8 border-2 shadow-lg transition-all text-right relative overflow-hidden ${
+                          decisionData.isReject 
+                            ? 'bg-gradient-to-br from-emerald-50 to-teal-50/40 dark:from-emerald-950/25 dark:to-teal-950/5 border-emerald-400 dark:border-emerald-800' 
+                            : 'bg-gradient-to-br from-slate-50 to-slate-100/45 dark:from-slate-900/25 dark:to-slate-800/5 border-slate-400 dark:border-slate-700'
+                        }`}>
+                          {/* Top Accent Strip */}
+                          <div className={`absolute top-0 right-0 w-full h-1.5 ${decisionData.isReject ? 'bg-emerald-500' : 'bg-slate-500'}`} />
                           
-                          <p className="text-base sm:text-lg text-slate-800 dark:text-slate-200 leading-relaxed pr-9 font-semibold">
-                            בשלב זה אנו מחשבים את קו הגבול (הערך הקריטי) במונחי הערכים המקוריים של ממוצע המדגם ועורכים השוואה בינו לבין ממוצע המדגם בפועל כדי לקבוע האם לדחות את השערת האפס:
-                          </p>
+                          <h3 className="text-lg sm:text-xl font-black mb-4 flex items-center gap-2 pb-3 border-b border-dashed border-slate-200 dark:border-slate-800/85">
+                            {decisionData.isReject ? (
+                              <CheckCircle className="text-emerald-500 animate-bounce shrink-0" size={24} />
+                            ) : (
+                              <XCircle className="text-slate-500 shrink-0" size={24} />
+                            )}
+                            <span className={`text-xl font-black ${decisionData.isReject ? 'text-emerald-900 dark:text-emerald-300' : 'text-slate-900 dark:text-slate-300'}`}>
+                              שלב הכרעה סטטיסטית סופי 4 (Statistical Verdict)
+                            </span>
+                            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 mr-auto font-mono">
+                              α = {alpha} | n = {n}
+                            </span>
+                          </h3>
 
-                          <div className="pr-9 space-y-5">
-                            {/* Step 4.1: Critical Value calculations */}
-                            <div className="space-y-3">
-                              <p className="text-base sm:text-lg text-slate-900 dark:text-slate-50 font-bold">1. חישוב הערך הקריטי של ממוצע המדגם (<InlineMath math="C_{\\text{crit}}" />):</p>
-                              <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
-                                <div className="bg-slate-100 dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-300 dark:border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
-                                  {tailType === 'right' ? (
-                                    <>
-                                      <div className="text-xs text-slate-500 mb-1 font-sans font-bold text-right" dir="rtl">מבחן חד-צדדי ימני:</div>
-                                      <BlockMath math={`C_{\\text{crit}} = \\mu_0 + (${decisionData.critSymbol} \\cdot SE_{\\bar{X}}) = ${mu0} + (${decisionData.critVal.toFixed(4)} \\cdot ${decisionData.seMean.toFixed(4)}) = ${decisionData.cCrit.toFixed(4)}`} />
-                                    </>
-                                  ) : tailType === 'left' ? (
-                                    <>
-                                      <div className="text-xs text-slate-500 mb-1 font-sans font-bold text-right" dir="rtl">מבחן חד-צדדי שמאלי:</div>
-                                      <BlockMath math={`C_{\\text{crit}} = \\mu_0 - (${decisionData.critSymbol} \\cdot SE_{\\bar{X}}) = ${mu0} - (${decisionData.critVal.toFixed(4)} \\cdot ${decisionData.seMean.toFixed(4)}) = ${decisionData.cCrit.toFixed(4)}`} />
-                                    </>
-                                  ) : (
-                                    <>
-                                      <div className="text-xs text-slate-500 mb-1 font-sans font-bold text-right" dir="rtl">מבחן דו-צדדי:</div>
-                                      <BlockMath math={`C_{\\text{crit}, 1} = \\mu_0 - (${decisionData.critSymbol} \\cdot SE_{\\bar{X}}) = ${mu0} - (${decisionData.critVal.toFixed(4)} \\cdot ${decisionData.seMean.toFixed(4)}) = ${decisionData.cCrit1.toFixed(4)}`} />
-                                      <BlockMath math={`C_{\\text{crit}, 2} = \\mu_0 + (${decisionData.critSymbol} \\cdot SE_{\\bar{X}}) = ${mu0} + (${decisionData.critVal.toFixed(4)} \\cdot ${decisionData.seMean.toFixed(4)}) = ${decisionData.cCrit2.toFixed(4)}`} />
-                                    </>
-                                  )}
-                                </div>
-                              </div>
+                          <div className="space-y-4">
+                            <div className="p-4 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 leading-relaxed text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200">
+                              <p className={`text-base sm:text-lg font-black ${decisionData.isReject ? 'text-emerald-800 dark:text-emerald-300' : 'text-slate-800 dark:text-slate-300'}`}>
+                                מצב: המדגם נמצא באזור {decisionData.isReject ? 'הדחייה C' : 'הקבלה \\bar{C}'}
+                              </p>
+                              <p className="text-base sm:text-lg font-black mt-2">
+                                החלטה פורמלית: <span className="font-mono underline decoration-2"><InlineMath math={decisionData.decisionHeading} /></span>
+                              </p>
                             </div>
-
-                            {/* Step 4.2: Actual sample mean */}
-                            <div className="space-y-3">
-                              <p className="text-base sm:text-lg text-slate-900 dark:text-slate-50 font-bold">2. ממוצע המדגם בפועל שהתקבל במחקר (<InlineMath math="\\bar{X}" />):</p>
-                              <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
-                                <div className="bg-slate-100 dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-300 dark:border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
-                                  <BlockMath math={`\\bar{X} = ${decisionData.formattedXBar}`} />
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Step 4.3: Decision Regions */}
-                            <div className="space-y-3">
-                              <p className="text-base sm:text-lg text-slate-900 dark:text-slate-50 font-bold">3. הגדרת אזורי ההכרעה וכלל ההחלטה:</p>
-                              
-                              <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
-                                <div className="bg-slate-100 dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-300 dark:border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px] text-right" dir="rtl">
-                                  <div className="font-extrabold text-slate-500 dark:text-slate-400 mb-2">אזורי ההכרעה במונחי הערכים המקוריים:</div>
-                                  <div className="space-y-2 text-left mb-4" dir="ltr">
-                                    <div className="flex items-center gap-3">
-                                      <span className="text-xs font-extrabold text-indigo-650 dark:text-indigo-400 min-w-[140px] font-sans text-right" dir="rtl">אזור הדחייה (<InlineMath math="R" />):</span>
-                                      <InlineMath math={decisionData.zoneRejectionTeX} />
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                      <span className="text-xs font-extrabold text-slate-500 dark:text-slate-400 min-w-[140px] font-sans text-right" dir="rtl">אזור אי-הדחייה (<InlineMath math="R^c" />):</span>
-                                      <InlineMath math={decisionData.zoneAcceptanceTeX} />
-                                    </div>
-                                  </div>
-                                  
-                                  <div className="border-t border-dashed border-slate-300 dark:border-slate-700 pt-3 text-right" dir="rtl">
-                                    <p className="text-sm sm:text-base text-slate-900 dark:text-slate-100 font-extrabold">
-                                      מכיוון שממוצע המדגם בפועל הוא <InlineMath math={`\\bar{X} = ${decisionData.formattedXBar}`} />, הוא משתייך לקבוצה {decisionData.isReject ? <InlineMath math="R" /> : <InlineMath math="R^c" />}.
-                                    </p>
-                                    <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-extrabold mt-1">
-                                      {tailType === 'right' ? (
-                                        <span>
-                                          כלל ההחלטה: נדחה את השערת האפס אם ממוצע המדגם <InlineMath math="\\bar{X}" /> גדול או שווה לערך הקריטי <InlineMath math={`C_{\\text{crit}} = ${decisionData.cCrit.toFixed(3)}`} />.
-                                        </span>
-                                      ) : tailType === 'left' ? (
-                                        <span>
-                                          כלל ההחלטה: נדחה את השערת האפס אם ממוצע המדגם <InlineMath math="\\bar{X}" /> קטן או שווה לערך הקריטי <InlineMath math={`C_{\\text{crit}} = ${decisionData.cCrit.toFixed(3)}`} />.
-                                        </span>
-                                      ) : (
-                                        <span>
-                                          כלל ההחלטה: נדחה את השערת האפס אם ממוצע המדגם <InlineMath math="\\bar{X}" /> מחוץ לגבולות הקבלה של המעטפת <InlineMath math={`[C_{\\text{crit},1}, C_{\\text{crit},2}] = [${decisionData.cCrit1.toFixed(3)}, ${decisionData.cCrit2.toFixed(3)}]`} />.
-                                        </span>
-                                      )}
-                                    </p>
-                                  </div>
-
-                                  <div className="flex items-center gap-2 pt-2">
-                                    {decisionData.isReject ? (
-                                      <CheckCircle className="text-emerald-600 dark:text-emerald-450 shrink-0" size={24} />
-                                    ) : (
-                                      <XCircle className="text-red-550 shrink-0" size={24} />
-                                    )}
-                                    <p className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                                      החלטה: <span className="font-mono underline underline-offset-4 decoration-2 text-indigo-650 dark:text-indigo-400"><InlineMath math={decisionData.decisionHeading} /></span>
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Step 4.4: Decision Verdict */}
-                            <div className="space-y-3">
-                              <p className="text-base sm:text-lg text-slate-900 dark:text-slate-50 font-bold">4. כלל ההחלטה וההכרעה הסופית:</p>
-                              
-                              <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
-                                <div className="bg-slate-100 dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-300 dark:border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px] text-right" dir="rtl">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    {decisionData.isReject ? (
-                                      <CheckCircle className="text-emerald-600 dark:text-emerald-450 shrink-0" size={20} />
-                                    ) : (
-                                      <XCircle className="text-red-650 dark:text-red-450 shrink-0" size={20} />
-                                    )}
-                                    <span className={`text-base sm:text-lg font-black ${decisionData.isReject ? 'text-emerald-700 dark:text-emerald-450' : 'text-red-700 dark:text-red-400'}`}>
-                                      {decisionData.isReject ? 'המדגם נמצא באזור הדחייה!' : 'המדגם נמצא באזור הקבלה!'}
-                                    </span>
-                                  </div>
-                                  <div className="text-sm sm:text-base text-slate-800 dark:text-slate-200 mt-2 space-y-1.5 leading-relaxed font-bold">
-                                    <p>
-                                      {tailType === 'right' ? (
-                                        <span>
-                                          מכיוון ש- <InlineMath math={`\\bar{X} = ${decisionData.xBar.toFixed(3)}`} /> {decisionData.isReject ? 'גדול או שווה לערך הקריטי' : 'קטן מהערך הקריטי'} <InlineMath math={`C_{\\text{crit}} = ${decisionData.cCrit.toFixed(3)}`} />, המדגם נמצא באזור {decisionData.isReject ? 'הדחייה' : 'הקבלה (אי-הדחייה)'}.
-                                        </span>
-                                      ) : tailType === 'left' ? (
-                                        <span>
-                                          מכיוון ש- <InlineMath math={`\\bar{X} = ${decisionData.xBar.toFixed(3)}`} /> {decisionData.isReject ? 'קטן או שווה לערך הקריטי' : 'גדול מהערך הקריטי'} <InlineMath math={`C_{\\text{crit}} = ${decisionData.cCrit.toFixed(3)}`} />, המדגם נמצא באזור {decisionData.isReject ? 'הדחייה' : 'הקבלה (אי-הדחייה)'}.
-                                        </span>
-                                      ) : (
-                                        <span>
-                                          מכיוון ש- <InlineMath math={`\\bar{X} = ${decisionData.xBar.toFixed(3)}`} /> {decisionData.isReject ? 'נמצא מחוץ לטווח הקבלה' : 'נמצא בתוך טווח הקבלה'} <InlineMath math={`[C_{\\text{crit},1}, C_{\\text{crit},2}] = [${decisionData.cCrit1.toFixed(3)}, ${decisionData.cCrit2.toFixed(3)}]`} />, המדגם נמצא באזור {decisionData.isReject ? 'הדחייה' : 'הקבלה (אי-הדחייה)'}.
-                                        </span>
-                                      )}
-                                    </p>
-                                    <p className="text-base sm:text-lg font-black mt-3">
-                                      ההכרעה: <span className="font-mono underline decoration-2 text-indigo-650 dark:text-indigo-400"><InlineMath math={decisionData.decisionHeading} /></span>
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Step 4.5: Verbal Conclusion */}
-                            <div className="space-y-3 pt-2">
-                              <p className="text-base sm:text-lg text-slate-900 dark:text-slate-50 font-bold">5. מסקנה מילולית אוטומטית בעברית:</p>
-                              <div className="p-5 rounded-2xl bg-indigo-50/45 dark:bg-indigo-950/20 shadow-inner border border-indigo-200 dark:border-indigo-900/50 text-slate-900 dark:text-slate-200 text-sm sm:text-base font-extrabold leading-relaxed text-right">
-                                {decisionData.verbalConclusion}
-                              </div>
-                            </div>
-
+                            
+                            <p className="text-sm sm:text-base font-extrabold text-slate-800 dark:text-slate-200 leading-relaxed mt-4">
+                              {decisionData.verbalConclusion}
+                            </p>
                           </div>
                         </div>
                       )}
@@ -1933,68 +1776,6 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
               )}
             </AnimatePresence>
           </div>
-
-          {/* Final Decision Block (Highlighted green/red panel) - Requirement 2 & 3 */}
-          {isValid && stats && decisionData && (
-            <div className={`rounded-3xl p-6 md:p-8 border-2 shadow-lg transition-all text-right relative overflow-hidden ${
-              decisionData.isReject 
-                ? 'bg-gradient-to-br from-emerald-50 to-teal-50/40 dark:from-emerald-950/25 dark:to-teal-950/5 border-emerald-400 dark:border-emerald-800' 
-                : 'bg-gradient-to-br from-red-50 to-orange-50/45 dark:from-red-950/25 dark:to-orange-950/5 border-red-400 dark:border-red-800'
-            }`}>
-              {/* Top Accent Strip */}
-              <div className={`absolute top-0 right-0 w-full h-1.5 ${decisionData.isReject ? 'bg-emerald-500' : 'bg-red-500'}`} />
-              
-              <h3 className="text-lg sm:text-xl font-black mb-4 flex items-center gap-2 pb-3 border-b border-dashed border-slate-200 dark:border-slate-800/85">
-                {decisionData.isReject ? (
-                  <CheckCircle className="text-emerald-500 animate-bounce shrink-0" size={24} />
-                ) : (
-                  <XCircle className="text-red-500 shrink-0" size={24} />
-                )}
-                <span className={`text-xl font-black ${decisionData.isReject ? 'text-emerald-900 dark:text-emerald-300' : 'text-red-900 dark:text-red-300'}`}>
-                  שלב הכרעה סטטיסטית סופי (Statistical Verdict)
-                </span>
-                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 mr-auto font-mono">
-                  α = {alpha} | n = {n}
-                </span>
-              </h3>
-
-              <div className="space-y-4">
-                {/* Rule display */}
-                <div className="p-4 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 leading-relaxed text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200">
-                  <div className="font-extrabold text-xs text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wide">כלל ההחלטה (Decision Rule):</div>
-                  <p>{decisionData.ruleText}</p>
-                </div>
-
-                {/* Main Formal Decision */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-xl bg-slate-100/50 dark:bg-slate-950/50 border border-slate-200/50 dark:border-slate-800/50">
-                  <div className="text-right">
-                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 block mb-1">ההכרעה הפורמלית (Decision):</span>
-                    <span className={`text-2xl sm:text-3xl font-black font-mono tracking-wide ${decisionData.isReject ? 'text-emerald-650 dark:text-emerald-400' : 'text-red-650 dark:text-red-400'}`}>
-                      {decisionData.decisionHeading}
-                    </span>
-                  </div>
-                  
-                  <div className="text-center sm:text-left" dir="ltr">
-                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 block mb-1 text-right" dir="rtl">ערך קריטי להשוואה (C_crit):</span>
-                    <span className="text-sm sm:text-base font-black font-mono bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg border dark:border-slate-800 shadow-sm inline-block">
-                      {tailType === 'two-tailed' 
-                        ? `[${decisionData.cCrit1.toFixed(3)}, ${decisionData.cCrit2.toFixed(3)}]` 
-                        : decisionData.cCrit.toFixed(3)
-                      }
-                    </span>
-                  </div>
-                </div>
-
-                {/* Verbal sentence */}
-                <div className="p-4 rounded-xl bg-indigo-50/40 dark:bg-indigo-950/15 border border-indigo-150/45 dark:border-indigo-900/40 text-slate-900 dark:text-slate-200 text-sm sm:text-base font-extrabold leading-relaxed">
-                  <div className="font-sans text-xs text-indigo-700 dark:text-indigo-400 mb-1 font-bold">מסקנה מילולית אוטומטית:</div>
-                  <p className="leading-relaxed">{decisionData.verbalConclusion}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-        </div>
 
         {/* LEFT Column - Info & Explanations Panel */}
         <div className="lg:col-span-3 space-y-6 order-2 lg:order-1">
@@ -2030,5 +1811,8 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
       </div>
 
     </div>
+    </div>
   );
 }
+
+
