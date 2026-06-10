@@ -236,7 +236,7 @@ function DecisionMatrix({ isValid, stats, alpha }: DecisionMatrixProps) {
  {/* Row 1: Fail to reject H0 (Accept H0) */}
  <tr className="border-b border-slate-800 font-semibold text-slate-950 text-slate-50">
  <td className="p-4 sm:p-5 border-l border-slate-800 font-extrabold bg-slate-900/40">
- <span className="text-base font-black block">קבלת <InlineMath math="H_0" /></span>
+ <span className="text-base font-black block text-slate-100">קבלת <InlineMath math="H_0" /></span>
  <span className="block text-[11px] font-bold text-slate-400 text-slate-400 mt-1">אי-דחיית השערת האפס</span>
  </td>
  
@@ -278,7 +278,7 @@ function DecisionMatrix({ isValid, stats, alpha }: DecisionMatrixProps) {
  {/* Row 2: Reject H0 */}
  <tr className="font-semibold text-slate-950 text-slate-50">
  <td className="p-4 sm:p-5 border-l border-slate-800 font-extrabold bg-slate-900/40">
- <span className="text-base font-black block">דחיית <InlineMath math="H_0" /></span>
+ <span className="text-base font-black block text-slate-100">דחיית <InlineMath math="H_0" /></span>
  <span className="block text-[11px] font-bold text-slate-400 text-slate-400 mt-1">קבלת הטענה האלטרנטיבית</span>
  </td>
 
@@ -1073,10 +1073,10 @@ export default function HypothesisTestingCalculator() {
  </div>
 
  {/* Main Grid Layout */}
- <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
- 
- {/* RIGHT Column - Dashboard & Visual Analytics */}
- <div className="lg:col-span-7 xl:col-span-8 space-y-8 order-1 lg:order-2">
+ <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+
+  {/* RIGHT Column - Dashboard & Visual Analytics */}
+  <div className="space-y-8 order-1 lg:order-2 w-full min-w-0">
 
  {/* Overlapping Curves Chart */}
  <div className="rounded-3xl p-6 md:p-8 border shadow-md transition-all bg-slate-900 border-slate-800">
@@ -1705,7 +1705,7 @@ export default function HypothesisTestingCalculator() {
  </div>
 
  {/* LEFT Column - Info & Explanations Panel */}
- <div className="lg:col-span-5 xl:col-span-4 space-y-6 order-2 lg:order-1">
+  <div className="space-y-6 order-2 lg:order-1 w-full min-w-0">
 
  {/* Decision Matrix Hero (Moved to side panel) */}
   <div className="rounded-3xl border p-5 md:p-6 text-right relative overflow-hidden shadow-lg transition-all bg-slate-900 border-slate-800 mb-6">
