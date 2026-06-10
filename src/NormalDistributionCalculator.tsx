@@ -1707,7 +1707,7 @@ export default function NormalDistributionCalculator() {
  
  {/* Header */}
  <header className="border-b sticky top-0 z-40 transition-colors shadow-sm bg-slate-900 border-slate-800">
- <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+ <div className="w-full mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
  <Calculator size={22} className="stroke-[2.5]" />
@@ -1730,7 +1730,7 @@ export default function NormalDistributionCalculator() {
  </header>
 
  <main className="w-full py-8">
- <div className="max-w-5xl mx-auto px-4">
+ <div className="w-full mx-auto px-4 md:px-8">
  
  {/* Navigation/Modes Tabs */}
  <div className="p-1 rounded-2xl border shadow-inner mb-6 flex flex-wrap transition-all gap-1 bg-slate-900 border-slate-800">
@@ -2300,7 +2300,7 @@ export default function NormalDistributionCalculator() {
  </main>
 
  {/* Footer */}
- <footer className="max-w-5xl mx-auto px-4 py-12 text-center text-xs font-bold text-slate-400/80 tracking-wide border-t border-slate-800 mt-12">
+ <footer className="w-full mx-auto px-4 md:px-8 py-12 text-center text-xs font-bold text-slate-400/80 tracking-wide border-t border-slate-800 mt-12">
  <p>© {new Date().getFullYear()} מחשבון התפלגות נורמלית מתקדם - פותח על ידי רוברט תיגר עבור סטודנטים</p>
  </footer>
  </div>
