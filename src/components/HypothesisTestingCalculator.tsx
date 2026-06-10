@@ -1508,11 +1508,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                                 </div>
                               </div>
 
-                              <div className={`border-2 rounded-2xl p-5 sm:p-6 mt-4 space-y-4 shadow-sm text-right ${
-                                theme === 'dark' 
-                                  ? 'bg-[#071b32] border-indigo-950/40' 
-                                  : 'bg-indigo-50/20 border-indigo-105/50'
-                              }`} dir="rtl">
+                              <div className="mt-6 space-y-4 text-right" dir="rtl">
                                 <p className="text-sm sm:text-base text-slate-850 dark:text-slate-100 font-extrabold mb-2 leading-relaxed">
                                   עבור ערך קריטי מוגדר <InlineMath math="c" /> וכלל החלטה (עבור {statName} <InlineMath math={statSymbol} />):
                                 </p>
@@ -1525,8 +1521,8 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                                         <strong className="text-indigo-700 dark:text-indigo-400 font-black font-sans">אזור הדחייה (<InlineMath math="C" />):</strong> קבוצת הערכים שעבורם נחליט לדחות את השערת האפס <InlineMath math="H_0" />.
                                       </p>
                                     </div>
-                                    <div className="w-full flex justify-center py-2.5" dir="ltr">
-                                      <div className="bg-slate-100/70 dark:bg-slate-950 text-slate-900 dark:text-slate-50 px-6 py-3.5 border border-slate-300 dark:border-slate-800 rounded-xl font-sans shadow-inner inline-block text-center max-w-full">
+                                    <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+                                      <div className="bg-slate-100 dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-300 dark:border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
                                         <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\ge ${stats.c2.toFixed(3)} \\right\\}`} />
                                       </div>
                                     </div>
@@ -1542,8 +1538,8 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                                         <strong className="text-slate-705 dark:text-slate-300 font-black font-sans">אזור הקבלה / אי-הדחייה (<InlineMath math="C^c" />):</strong> קבוצת הערכים המשלימה שעבורם לא נדחה את השערת האפס <InlineMath math="H_0" />.
                                       </p>
                                     </div>
-                                    <div className="w-full flex justify-center py-2.5" dir="ltr">
-                                      <div className="bg-slate-100/70 dark:bg-slate-950 text-slate-900 dark:text-slate-50 px-6 py-3.5 border border-slate-300 dark:border-slate-800 rounded-xl font-sans shadow-inner inline-block text-center max-w-full">
+                                    <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+                                      <div className="bg-slate-100 dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-300 dark:border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
                                         <BlockMath math={`C^c = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} < ${stats.c2.toFixed(3)} \\right\\}`} />
                                       </div>
                                     </div>
@@ -1577,11 +1573,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                                 </div>
                               </div>
 
-                              <div className={`border-2 rounded-2xl p-5 sm:p-6 mt-4 space-y-4 shadow-sm text-right ${
-                                theme === 'dark' 
-                                  ? 'bg-[#071b32] border-indigo-950/40' 
-                                  : 'bg-indigo-50/20 border-indigo-105/50'
-                              }`} dir="rtl">
+                              <div className="mt-6 space-y-4 text-right" dir="rtl">
                                 <p className="text-sm sm:text-base text-slate-850 dark:text-slate-100 font-extrabold mb-2 leading-relaxed">
                                   עבור ערך קריטי מוגדר <InlineMath math="c" /> וכלל החלטה (עבור {statName} <InlineMath math={statSymbol} />):
                                 </p>
@@ -1594,8 +1586,8 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                                         <strong className="text-indigo-700 dark:text-indigo-400 font-black font-sans">אזור הדחייה (<InlineMath math="C" />):</strong> קבוצת הערכים שעבורם נחליט לדחות את השערת האפס <InlineMath math="H_0" />.
                                       </p>
                                     </div>
-                                    <div className="w-full flex justify-center py-2.5" dir="ltr">
-                                      <div className="bg-slate-100/70 dark:bg-slate-950 text-slate-900 dark:text-slate-50 px-6 py-3.5 border border-slate-300 dark:border-slate-800 rounded-xl font-sans shadow-inner inline-block text-center max-w-full">
+                                    <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+                                      <div className="bg-slate-100 dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-300 dark:border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
                                         <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\le ${stats.c2.toFixed(3)} \\right\\}`} />
                                       </div>
                                     </div>
@@ -1611,8 +1603,8 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                                         <strong className="text-slate-705 dark:text-slate-300 font-black font-sans">אזור הקבלה / אי-הדחייה (<InlineMath math="C^c" />):</strong> קבוצת הערכים המשלימה שעבורם לא נדחה את השערת האפס <InlineMath math="H_0" />.
                                       </p>
                                     </div>
-                                    <div className="w-full flex justify-center py-2.5" dir="ltr">
-                                      <div className="bg-slate-100/70 dark:bg-slate-950 text-slate-900 dark:text-slate-50 px-6 py-3.5 border border-slate-300 dark:border-slate-800 rounded-xl font-sans shadow-inner inline-block text-center max-w-full">
+                                    <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+                                      <div className="bg-slate-100 dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-300 dark:border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
                                         <BlockMath math={`C^c = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} > ${stats.c2.toFixed(3)} \\right\\}`} />
                                       </div>
                                     </div>
@@ -1644,11 +1636,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                                 </div>
                               </div>
 
-                              <div className={`border-2 rounded-2xl p-5 sm:p-6 mt-4 space-y-4 shadow-sm text-right ${
-                                theme === 'dark' 
-                                  ? 'bg-[#071b32] border-indigo-950/40' 
-                                  : 'bg-indigo-50/20 border-indigo-105/50'
-                              }`} dir="rtl">
+                              <div className="mt-6 space-y-4 text-right" dir="rtl">
                                 <p className="text-sm sm:text-base text-slate-850 dark:text-slate-100 font-extrabold mb-2 leading-relaxed">
                                   עבור שני ערכים קריטיים מוגדרים <InlineMath math="c_1, c_2" /> וכלל החלטה (עבור {statName} <InlineMath math={statSymbol} />):
                                 </p>
@@ -1661,8 +1649,8 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                                         <strong className="text-indigo-700 dark:text-indigo-400 font-black font-sans">אזור הדחייה (<InlineMath math="C" />):</strong> קבוצת הערכים שעבורם נחליט לדחות את השערת האפס <InlineMath math="H_0" />.
                                       </p>
                                     </div>
-                                    <div className="w-full flex justify-center py-2.5" dir="ltr">
-                                      <div className="bg-slate-100/70 dark:bg-slate-950 text-slate-900 dark:text-slate-50 px-6 py-3.5 border border-slate-300 dark:border-slate-800 rounded-xl font-sans shadow-inner inline-block text-center max-w-full">
+                                    <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+                                      <div className="bg-slate-100 dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-300 dark:border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
                                         <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\le ${stats.c1.toFixed(3)} \\;\\cup\\; ${statSymbol} \\ge ${stats.c2.toFixed(3)} \\right\\}`} />
                                       </div>
                                     </div>
@@ -1678,8 +1666,8 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
                                         <strong className="text-slate-705 dark:text-slate-300 font-black font-sans">אזור הקבלה / אי-הדחייה (<InlineMath math="C^c" />):</strong> קבוצת הערכים המשלימה שעבורם לא נדחה את השערת האפס <InlineMath math="H_0" />.
                                       </p>
                                     </div>
-                                    <div className="w-full flex justify-center py-2.5" dir="ltr">
-                                      <div className="bg-slate-100/70 dark:bg-slate-950 text-slate-900 dark:text-slate-50 px-6 py-3.5 border border-slate-300 dark:border-slate-800 rounded-xl font-sans shadow-inner inline-block text-center max-w-full">
+                                    <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+                                      <div className="bg-slate-100 dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-300 dark:border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
                                         <BlockMath math={`C^c = \\left\\{ ${statSymbol} \\;\\middle|\\; ${stats.c1.toFixed(3)} < ${statSymbol} < ${stats.c2.toFixed(3)} \\right\\}`} />
                                       </div>
                                     </div>
