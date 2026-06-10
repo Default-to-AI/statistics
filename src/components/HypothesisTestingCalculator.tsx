@@ -1690,6 +1690,22 @@ export default function HypothesisTestingCalculator() {
  <span>החלטה פורמלית:</span>
  <span className="font-mono underline decoration-2 mt-1" dir="ltr"><InlineMath math={decisionData.decisionHeading} /></span>
  </div>
+
+ {/* Zone Formal Data */}
+ <div className="mt-5 p-3.5 bg-slate-950/40 rounded-xl border border-slate-800/50 flex flex-col gap-2.5 text-center text-sm">
+ <div className="flex flex-col sm:flex-row justify-center items-center gap-2">
+ <span className="text-slate-400 font-extrabold">הגדרת האזור:</span>
+ <span className="font-mono text-indigo-300" dir="ltr"><InlineMath math={decisionData.isReject ? decisionData.zoneRejectionTeX : decisionData.zoneAcceptanceTeX} /></span>
+ </div>
+ <div className="flex flex-col sm:flex-row justify-center items-center gap-2">
+ <span className="text-slate-400 font-extrabold flex items-center">הסתברות בהינתן <span className="font-mono ml-1 mt-0.5"><InlineMath math="H_0" /></span>:</span>
+ <span className="font-mono text-indigo-300" dir="ltr"><InlineMath math={decisionData.isReject ? `P(\\bar{X} \\in C \\mid H_0) = \\alpha = ${alpha}` : `P(\\bar{X} \\in \\bar{C} \\mid H_0) = 1 - \\alpha = ${parseFloat((1 - alpha).toFixed(4))}`} /></span>
+ </div>
+ <div className="text-slate-300 font-semibold mt-1">
+ {decisionData.belongingExplanationText}
+ </div>
+ </div>
+
  </div>
  
  <p className="text-sm sm:text-base font-extrabold text-slate-200 leading-relaxed mt-4">
