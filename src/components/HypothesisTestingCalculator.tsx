@@ -8,19 +8,21 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { InlineMath, BlockMath } from 'react-katex';
 import {
- Info,
- Calculator,
- RefreshCw,
- TrendingUp,
- Sliders,
- Award,
- AlertTriangle,
- ChevronDown,
- ChevronUp,
- HelpCircle,
- CheckCircle,
- XCircle,
- BarChart2
+  Info,
+  Calculator,
+  RefreshCw,
+  TrendingUp,
+  Sliders,
+  Award,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  HelpCircle,
+  CheckCircle,
+  XCircle,
+  BarChart2,
+  Check,
+  X
 } from 'lucide-react';
 import {
  ResponsiveContainer,
@@ -208,12 +210,13 @@ type TailType ='right' |'left' |'two-tailed';
 
 // --- Decision Matrix Helper Component ---
 interface DecisionMatrixProps {
- isValid: boolean;
- stats: any;
- alpha: number;
+  isValid: boolean;
+  stats: any;
+  alpha: number;
+  calculatePower: boolean;
 }
 
-function DecisionMatrix({ isValid, stats, alpha }: DecisionMatrixProps) {
+function DecisionMatrix({ isValid, stats, alpha, calculatePower }: DecisionMatrixProps) {
  if (!isValid || !stats) {
  return (
  <div className="py-12 text-center text-slate-500 font-bold text-sm">
@@ -229,15 +232,15 @@ function DecisionMatrix({ isValid, stats, alpha }: DecisionMatrixProps) {
  <tr className="bg-slate-800/70 text-xs text-slate-300 font-extrabold border-b border-slate-800">
  <th className="p-4 border-l border-slate-800 text-center font-black text-slate-100 bg-slate-800/25 w-1/4">החלטת המבחן</th>
  <th className="p-4 border-l border-slate-800 text-center font-black bg-blue-900/10" style={{ minWidth:'180px' }}>H₀ נכונה במציאות (אין אפקט)</th>
- <th className="p-4 text-center font-black bg-amber-50/30 bg-amber-900/10" style={{ minWidth:'180px' }}>H₁ נכונה במציאות (קיים אפקט)</th>
+ <th className={`p-4 text-center font-black bg-amber-900/10 transition-all ${!calculatePower ? 'opacity-30' : ''}`} style={{ minWidth:'180px' }}>H₁ נכונה במציאות (קיים אפקט)</th>
  </tr>
  </thead>
  <tbody>
  {/* Row 1: Fail to reject H0 (Accept H0) */}
  <tr className="border-b border-slate-800 font-semibold text-slate-950 text-slate-50">
- <td className="p-4 sm:p-5 border-l border-slate-800 font-extrabold bg-slate-900/40">
- <span className="text-base font-black block text-slate-100">קבלת <InlineMath math="H_0" /></span>
- <span className="block text-[11px] font-bold text-slate-400 text-slate-400 mt-1">אי-דחיית השערת האפס</span>
+ <td className="p-4 sm:p-5 border-l border-slate-800 font-extrabold bg-red-950/20 text-red-100 border-r-4 border-r-red-500/80">
+ <span className="text-base font-black block text-red-400">קבלת <InlineMath math="H_0" /></span>
+ <span className="block text-[11px] font-bold text-red-300 mt-1">אי-דחיית השערת האפס</span>
  </td>
  
  {/* Cell 1-1: Accept H0 and H0 is true => Correct decision */}
@@ -258,7 +261,9 @@ function DecisionMatrix({ isValid, stats, alpha }: DecisionMatrixProps) {
  </td>
 
  {/* Cell 1-2: Accept H0 but H1 is true => Type II Error Beta */}
- <td className="p-4 sm:p-5 bg-amber-950/10 hover:bg-amber-950/20 transition-all">
+ <td className={`p-4 sm:p-5 transition-all ${!calculatePower ? 'bg-slate-950/15 opacity-40 select-none' : 'bg-amber-950/10 hover:bg-amber-950/20'}`}>
+ {calculatePower ? (
+ <>
  <div className="flex items-center justify-between gap-2">
  <span className="font-extrabold text-amber-400 flex items-center gap-1.5 text-xs sm:text-sm">
  <XCircle size={15} className="text-amber-600" />
@@ -272,14 +277,22 @@ function DecisionMatrix({ isValid, stats, alpha }: DecisionMatrixProps) {
  <p className="text-[11px] text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
  קבלת השערת האפס אף על פי שהיא שקרית – החמצת גילוי של אפקט או הבדל קיים במציאות.
  </p>
+ </>
+ ) : (
+ <div className="flex flex-col items-center justify-center py-6 text-center text-slate-400">
+ <Info size={16} className="mb-2 text-slate-500" />
+ <span className="text-xs font-black">לא פעיל</span>
+ <span className="text-[10px] text-slate-500 mt-1 leading-normal max-w-[130px]">הפעל "חישוב עוצמת מבחן" בפרמטרים</span>
+ </div>
+ )}
  </td>
  </tr>
 
  {/* Row 2: Reject H0 */}
  <tr className="font-semibold text-slate-950 text-slate-50">
- <td className="p-4 sm:p-5 border-l border-slate-800 font-extrabold bg-slate-900/40">
- <span className="text-base font-black block text-slate-100">דחיית <InlineMath math="H_0" /></span>
- <span className="block text-[11px] font-bold text-slate-400 text-slate-400 mt-1">קבלת הטענה האלטרנטיבית</span>
+ <td className="p-4 sm:p-5 border-l border-slate-800 font-extrabold bg-emerald-950/20 text-emerald-100 border-r-4 border-r-emerald-500/80">
+ <span className="text-base font-black block text-emerald-400">דחיית <InlineMath math="H_0" /></span>
+ <span className="block text-[11px] font-bold text-emerald-300 mt-1">קבלת הטענה האלטרנטיבית</span>
  </td>
 
  {/* Cell 2-1: Reject H0 and H0 is true => Type I Error Alpha */}
@@ -300,7 +313,13 @@ function DecisionMatrix({ isValid, stats, alpha }: DecisionMatrixProps) {
  </td>
 
  {/* Cell 2-2: Reject H0 and H1 is true => Correct decision Power! */}
- <td className="p-4 sm:p-5 bg-gradient-to-br from-indigo-50/30 to-emerald-50/30 from-indigo-950/10 to-emerald-950/10 hover:from-indigo-50/45 hover:to-emerald-50/45 hover:from-indigo-950/15 hover:to-emerald-950/15 transition-all">
+ <td className={`p-4 sm:p-5 transition-all ${
+ !calculatePower 
+ ? 'bg-slate-950/15 opacity-40 select-none' 
+ : 'bg-gradient-to-br from-indigo-50/30 to-emerald-50/30 from-indigo-950/10 to-emerald-950/10 hover:from-indigo-50/45 hover:to-emerald-50/45 hover:from-indigo-950/15 hover:to-emerald-950/15 transition-all'
+ }`}>
+ {calculatePower ? (
+ <>
  <div className="flex items-center justify-between gap-2">
  <span className="font-extrabold text-indigo-300 flex items-center gap-1.5 text-xs sm:text-sm">
  <CheckCircle size={15} className="text-indigo-400" />
@@ -314,6 +333,14 @@ function DecisionMatrix({ isValid, stats, alpha }: DecisionMatrixProps) {
  <p className="text-[11px] text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
  עוצמת המבחן – ההסתברות של המחקר לזהות ולדחות השערה מוטעית, ובכך להוכיח את קיומו של אפקט אמיתי.
  </p>
+ </>
+ ) : (
+ <div className="flex flex-col items-center justify-center py-6 text-center text-slate-400">
+ <Info size={16} className="mb-2 text-slate-500" />
+ <span className="text-xs font-black">לא פעיל</span>
+ <span className="text-[10px] text-slate-500 mt-1 leading-normal max-w-[130px]">הפעל "חישוב עוצמת מבחן" בפרמטרים</span>
+ </div>
+ )}
  </td>
  </tr>
  </tbody>
@@ -326,52 +353,58 @@ function DecisionMatrix({ isValid, stats, alpha }: DecisionMatrixProps) {
 interface InputTooltipProps {
  content: string;
  children: React.ReactNode;
+ className?: string;
 }
 
-const InputTooltip: React.FC<InputTooltipProps> = ({ content, children }) => {
- const [isVisible, setIsVisible] = useState(false);
- const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+const InputTooltip: React.FC<InputTooltipProps> = ({ content, children, className = "" }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
- const showTooltip = () => {
- if (timeoutRef.current) clearTimeout(timeoutRef.current);
- setIsVisible(true);
- };
+  const showTooltip = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setIsVisible(true);
+  };
 
- const hideTooltip = () => {
- timeoutRef.current = setTimeout(() => {
- setIsVisible(false);
- }, 100);
- };
+  const hideTooltip = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsVisible(false);
+    }, 100);
+  };
 
- return (
- <div className="relative inline-block" onMouseEnter={showTooltip} onMouseLeave={hideTooltip}>
- {children}
- <AnimatePresence>
- {isVisible && (
- <motion.div
- initial={{ opacity: 0, y: 5, scale: 0.95 }}
- animate={{ opacity: 1, y: 0, scale: 1 }}
- exit={{ opacity: 0, y: 5, scale: 0.95 }}
- className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 p-2.5 text-xs rounded-xl shadow-xl pointer-events-none text-center leading-normal font-medium bg-slate-800 text-slate-100 border border-slate-700"
- >
- {content}
- <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-slate-800" />
- </motion.div>
- )}
- </AnimatePresence>
- </div>
- );
+  return (
+    <div className={`relative inline-flex items-center gap-1.5 ${className}`} onMouseEnter={showTooltip} onMouseLeave={hideTooltip}>
+      {children}
+      <Info size={13} className="text-indigo-400/80 hover:text-indigo-300 cursor-help shrink-0" />
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            initial={{ opacity: 0, y: 5, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 5, scale: 0.95 }}
+            className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 p-2.5 text-xs rounded-xl shadow-xl pointer-events-none text-center leading-normal font-medium bg-slate-800 text-slate-100 border border-slate-700 font-sans"
+          >
+            {content}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-slate-800" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 };
 
 export default function HypothesisTestingCalculator() {
  // Input states
  const [varianceKnown, setVarianceKnown] = useLocalStorageState<boolean>('HT_varianceKnown', true);
+ const [calculatePower, setCalculatePower] = useLocalStorageState<boolean>('HT_calculatePower', true);
 
  const [mu0, setMu0] = useLocalStorageState<number>('HT_mu0', 100);
  const [mu0Input, setMu0Input] = useLocalStorageState<string>('HT_mu0Input', '100');
  
  const [mu1, setMu1] = useLocalStorageState<number>('HT_mu1', 108);
  const [mu1Input, setMu1Input] = useLocalStorageState<string>('HT_mu1Input', '108');
+
+ const [muH1, setMuH1] = useLocalStorageState<number>('HT_muH1', 108);
+ const [muH1Input, setMuH1Input] = useLocalStorageState<string>('HT_muH1Input', '108');
 
  const [sigma, setSigma] = useLocalStorageState<number>('HT_sigma', 15);
  const [sigmaInput, setSigmaInput] = useLocalStorageState<string>('HT_sigmaInput', '15');
@@ -457,6 +490,12 @@ export default function HypothesisTestingCalculator() {
  if (mu1Input.trim() ==='') errList.mu1 ='שדה חובה';
  else if (isNaN(parsedMu1)) errList.mu1 ='הזן מספר תקין';
 
+ const parsedMuH1 = parseFloat(muH1Input);
+ if (calculatePower) {
+  if (muH1Input.trim() === '') errList.muH1 = 'שדה חובה';
+  else if (isNaN(parsedMuH1)) errList.muH1 = 'הזן מספר תקין';
+ }
+
  const parsedSigma = parseFloat(sigmaInput);
  if (sigmaInput.trim() ==='') errList.sigma ='שדה חובה';
  else if (isNaN(parsedSigma)) errList.sigma ='הזן מספר תקין';
@@ -473,7 +512,7 @@ export default function HypothesisTestingCalculator() {
  else if (parsedAlpha <= 0 || parsedAlpha >= 1) errList.alpha ='רמת מובהקות חייבת להיות בין 0 ל-1 בלבד';
 
  return errList;
- }, [mu0Input, mu1Input, sigmaInput, nInput, alphaInput]);
+ }, [mu0Input, mu1Input, sigmaInput, nInput, alphaInput, calculatePower, muH1Input]);
 
  const isValid = useMemo(() => Object.keys(errors).length === 0, [errors]);
 
@@ -488,6 +527,12 @@ export default function HypothesisTestingCalculator() {
  setMu1Input(val);
  const parsed = parseFloat(val);
  if (!isNaN(parsed)) setMu1(parsed);
+ };
+
+ const handleMuH1Change = (val: string) => {
+ setMuH1Input(val);
+ const parsed = parseFloat(val);
+ if (!isNaN(parsed)) setMuH1(parsed);
  };
 
  const handleSigmaChange = (val: string) => {
@@ -517,10 +562,13 @@ export default function HypothesisTestingCalculator() {
  // Reset calculator to standard defaults
  const handleReset = () => {
  setVarianceKnown(true);
+ setCalculatePower(true);
  setMu0(100);
  setMu0Input('100');
  setMu1(108);
  setMu1Input('108');
+ setMuH1(108);
+ setMuH1Input('108');
  setSigma(15);
  setSigmaInput('15');
  setN(36);
@@ -538,21 +586,21 @@ export default function HypothesisTestingCalculator() {
  // 1. Calculate Standard Error (SE) based on Test Type and CLT
  let se = sigma;
  let effectH0Mean = mu0;
- let effectH1Mean = mu1; // Explicitly uses mu1, decoupled from xBar
+ let effectH1Mean = muH1;
 
  if (testType ==='mean') {
  se = sigma / Math.sqrt(n);
  effectH0Mean = mu0;
- effectH1Mean = mu1;
+ effectH1Mean = muH1;
  } else if (testType ==='sum') {
  se = sigma * Math.sqrt(n);
  effectH0Mean = mu0 * n;
- effectH1Mean = mu1 * n;
+ effectH1Mean = muH1 * n;
  } else {
  // Single item
  se = sigma;
  effectH0Mean = mu0;
- effectH1Mean = mu1;
+ effectH1Mean = muH1;
  }
 
  const df = testType ==='single' ? 1 : Math.max(1, n - 1);
@@ -641,7 +689,7 @@ export default function HypothesisTestingCalculator() {
  ncp,
  varianceKnown
  };
- }, [mu0, mu1, sigma, n, alpha, testType, tailType, isValid, varianceKnown]);
+ }, [mu0, mu1, muH1, sigma, n, alpha, testType, tailType, isValid, varianceKnown, calculatePower]);
 
  // --- Dynamic Decision Data Logic ---
  const decisionData = useMemo(() => {
@@ -705,59 +753,123 @@ export default function HypothesisTestingCalculator() {
  };
  }, [stats, isValid, mu0, mu1, alpha, tailType]);
 
- // --- Dynamic Graph Data Generation ---
- const chartData = useMemo(() => {
- if (!stats || !isValid) return [];
+ // --- Chart Limits for X-axis & Gradient Calculations ---
+  const chartLimits = useMemo(() => {
+    if (!stats || !isValid) return { xMin: 0, xMax: 100 };
+    const { effectH0Mean, effectH1Mean, se } = stats;
+    const minCenter = calculatePower ? Math.min(effectH0Mean, effectH1Mean) : effectH0Mean;
+    const maxCenter = calculatePower ? Math.max(effectH0Mean, effectH1Mean) : effectH0Mean;
+    return {
+      xMin: minCenter - 4.2 * se,
+      xMax: maxCenter + 4.2 * se,
+    };
+  }, [stats, isValid, calculatePower]);
 
- const pts = [];
- const numPoints = 180;
- const { effectH0Mean, effectH1Mean, se, c1, c2 } = stats;
+  // --- Custom Ticks for X-Axis representing means and standard deviations ---
+  const xAxisTicks = useMemo(() => {
+    if (!stats || !isValid) return [];
+    const { effectH0Mean, effectH1Mean, se } = stats;
+    
+    const ticksSet = new Set<string>();
+    
+    const addVal = (val: number) => {
+      ticksSet.add(val.toFixed(2));
+    };
 
- // We want the graph limits to cover approx 4.2 standard errors around both peaks
- const minCenter = Math.min(effectH0Mean, effectH1Mean);
- const maxCenter = Math.max(effectH0Mean, effectH1Mean);
- 
- const xMin = minCenter - 4.2 * se;
- const xMax = maxCenter + 4.2 * se;
- const step = (xMax - xMin) / (numPoints - 1);
+    addVal(effectH0Mean);
+    addVal(effectH0Mean - se);
+    addVal(effectH0Mean + se);
+    addVal(effectH0Mean - 2 * se);
+    addVal(effectH0Mean + 2 * se);
+    addVal(effectH0Mean - 3 * se);
+    addVal(effectH0Mean + 3 * se);
 
- for (let i = 0; i < numPoints; i++) {
- const x = xMin + i * step;
- const { df, varianceKnown } = stats;
- const pdfH0 = varianceKnown 
- ? normalPDF(x, effectH0Mean, se) 
- : studentTPDF((x - effectH0Mean) / se, df) / se;
- const pdfH1 = varianceKnown 
- ? normalPDF(x, effectH1Mean, se) 
- : studentTPDF((x - effectH1Mean) / se, df) / se;
+    if (calculatePower) {
+      addVal(effectH1Mean);
+      addVal(effectH1Mean - se);
+      addVal(effectH1Mean + se);
+      addVal(effectH1Mean - 2 * se);
+      addVal(effectH1Mean + 2 * se);
+      addVal(effectH1Mean - 3 * se);
+      addVal(effectH1Mean + 3 * se);
+    }
 
- // Determine rejection regions to shade Alpha and Power
- let isRejected = false;
- if (tailType ==='right') {
- isRejected = x >= c2;
- } else if (tailType ==='left') {
- isRejected = x <= c1; 
- } else { // two-tailed
- isRejected = x <= c1 || x >= c2;
- }
+    const rawTicks = Array.from(ticksSet).map(Number).sort((a, b) => a - b);
+    const finalTicks: number[] = [];
+    const minSpacing = se * 0.45;
 
- // Rejection area under H0 is Alpha (Type I Error)
- const alphaShade = isRejected ? pdfH0 : 0;
- 
- // Rejection area under H1 is Power (1-Beta)
- const powerShade = isRejected ? pdfH1 : 0;
+    for (const t of rawTicks) {
+      if (finalTicks.length === 0) {
+        finalTicks.push(t);
+      } else {
+        const prev = finalTicks[finalTicks.length - 1];
+        if (t - prev >= minSpacing) {
+          finalTicks.push(t);
+        } else {
+          const diffPrevToMean = Math.abs(prev - effectH0Mean);
+          const diffCurrToMean = Math.abs(t - effectH0Mean);
+          const diffPrevToMeanH1 = calculatePower ? Math.abs(prev - effectH1Mean) : Infinity;
+          const diffCurrToMeanH1 = calculatePower ? Math.abs(t - effectH1Mean) : Infinity;
+          
+          const prevIsMean = diffPrevToMean < 0.01 || diffPrevToMeanH1 < 0.01;
+          const currIsMean = diffCurrToMean < 0.01 || diffCurrToMeanH1 < 0.01;
+          
+          if (currIsMean && !prevIsMean) {
+            finalTicks[finalTicks.length - 1] = t;
+          }
+        }
+      }
+    }
+    return finalTicks;
+  }, [stats, isValid, calculatePower]);
 
- pts.push({
- x: Number(x.toFixed(4)),
- pdfH0,
- pdfH1,
- alphaShade,
- powerShade,
- });
- }
+  // --- Dynamic Graph Data Generation ---
+  const chartData = useMemo(() => {
+    if (!stats || !isValid) return [];
 
- return pts;
- }, [stats, isValid, tailType]);
+    const pts = [];
+    const numPoints = 180;
+    const { effectH0Mean, effectH1Mean, se, c1, c2 } = stats;
+    const { xMin, xMax } = chartLimits;
+    const step = (xMax - xMin) / (numPoints - 1);
+
+    for (let i = 0; i < numPoints; i++) {
+      const x = xMin + i * step;
+      const { df, varianceKnown } = stats;
+      const pdfH0 = varianceKnown 
+        ? normalPDF(x, effectH0Mean, se) 
+        : studentTPDF((x - effectH0Mean) / se, df) / se;
+      const pdfH1 = calculatePower ? (varianceKnown 
+        ? normalPDF(x, effectH1Mean, se) 
+        : studentTPDF((x - effectH1Mean) / se, df) / se) : 0;
+
+      // Determine rejection regions to shade Alpha and Power
+      let isRejected = false;
+      if (tailType === 'right') {
+        isRejected = x >= c2;
+      } else if (tailType === 'left') {
+        isRejected = x <= c2; 
+      } else { // two-tailed
+        isRejected = x <= c1 || x >= c2;
+      }
+
+      // Rejection area under H0 is Alpha (Type I Error)
+      const alphaShade = isRejected ? pdfH0 : 0;
+      
+      // Rejection area under H1 is Power (1-Beta)
+      const powerShade = calculatePower && isRejected ? pdfH1 : 0;
+
+      pts.push({
+        x: Number(x.toFixed(4)),
+        pdfH0,
+        pdfH1,
+        alphaShade,
+        powerShade,
+      });
+    }
+
+    return pts;
+  }, [stats, isValid, tailType, calculatePower, chartLimits]);
 
  // Custom tooltips for graphs
   const CustomChartTooltip = ({ active, payload }: any) => {
@@ -767,16 +879,16 @@ export default function HypothesisTestingCalculator() {
         <div className="p-3 border rounded-xl shadow-lg text-xs font-sans text-right space-y-1 backdrop-blur-md bg-slate-900/90 border-slate-700 text-slate-100">
           <p className="font-bold text-sm text-indigo-400">נקודת נתונים</p>
           <p className="flex justify-between gap-4">
-            <span>ערך (X):</span> 
+            <span>X:</span> 
             <span className="font-mono font-bold">{dataPt.x}</span>
           </p>
           <p className="flex justify-between gap-4 text-blue-300">
-            <span>צפיפות תחת H₀:</span> 
+            <span>H₀:</span> 
             <span className="font-mono font-bold">{dataPt.pdfH0.toFixed(4)}</span>
           </p>
           <p className="flex justify-between gap-4 text-amber-300">
-            <span>צפיפות תחת H₁:</span> 
-            <span className="font-mono font-bold">{dataPt.pdfH1.toFixed(4)}</span>
+            <span>H₁:</span>
+						<span className="font-mono font-bold">{dataPt.pdfH1.toFixed(4)}</span>
           </p>
         </div>
       );
@@ -798,43 +910,63 @@ export default function HypothesisTestingCalculator() {
         <div className="grid grid-cols-1 md:grid-cols-[1fr_225px] gap-6">
           <div className="flex-1 min-w-0">
             {/* Custom Parameters Table Layout */}
-            <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/10 transition-all mb-6" dir="rtl">
+            <div className="overflow-visible rounded-2xl border border-slate-800 bg-slate-950/10 transition-all mb-6" dir="rtl">
               <table className="w-full border-collapse border-spacing-0">
                 <thead>
                   <tr className="bg-slate-800/40 border-b border-slate-800">
-                    <th className="p-3.5 text-right font-black text-xs sm:text-sm text-slate-300 w-[35%] border-l border-slate-800">
+                    <th className="p-3.5 text-right font-black text-xs sm:text-sm text-slate-300 w-[28%] border-l border-slate-800">
                       <div className="flex items-center gap-2.5 justify-start">
                         <button
                           type="button"
                           onClick={() => setVarianceKnown(!varianceKnown)}
-                          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                            varianceKnown ? 'bg-indigo-650' : 'bg-slate-700'
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                            varianceKnown ? 'bg-indigo-600' : 'bg-slate-700/80'
                           }`}
                         >
+                          {/* On State Checkmark */}
+                          <span className={`absolute right-1 top-0 bottom-0 flex items-center justify-center text-white transition-opacity duration-200 ${varianceKnown ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+                            <Check size={10} className="stroke-[3.5]" />
+                          </span>
+
+                          {/* Off State X */}
+                          <span className={`absolute left-1 top-0 bottom-0 flex items-center justify-center text-slate-300 transition-opacity duration-200 ${!varianceKnown ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+                            <X size={10} className="stroke-[3.5]" />
+                          </span>
+
                           <span
-                            className={`pointer-events-none inline-block h-[14px] w-[14px] transform rounded-full bg-white transition duration-200 ease-in-out ${
-                              varianceKnown ? '-translate-x-4' : 'translate-x-0'
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition duration-200 ease-in-out ${
+                              varianceKnown ? '-translate-x-5' : 'translate-x-0'
                             }`}
                           />
                         </button>
                         <span>שונות ידועה:</span>
                       </div>
                     </th>
-                    <th className="p-3.5 text-center font-black text-xs sm:text-sm text-slate-300 w-[32.5%] border-l border-slate-800">
-                      אוכלוסייה
+                    <th className="p-3.5 text-center font-black text-xs sm:text-sm text-slate-300 w-[24%] border-l border-slate-800">
+                      <div className="flex items-center gap-1.5 justify-center">
+                        <span>אוכלוסייה</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-none bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-bold shrink-0">H₀</span>
+                      </div>
                     </th>
-                    <th className="p-3.5 text-center font-black text-xs sm:text-sm text-slate-300 w-[32.5%]">
+                    <th className="p-3.5 text-center font-black text-xs sm:text-sm text-slate-300 w-[24%] border-l border-slate-800">
                       מדגם
+                    </th>
+                    <th className="p-3.5 text-center font-black text-xs sm:text-sm text-slate-300 w-[24%]">
+                      <InputTooltip content="תחת הנחת סטיית תקן זהה, אם ידועה">
+                        <div className="flex items-center gap-1.5 justify-center cursor-help">
+                          <span>השערת המחקר</span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-none bg-amber-500/20 border border-amber-500/30 text-amber-300 font-bold shrink-0">H₁</span>
+                        </div>
+                      </InputTooltip>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {/* Row 1: mu0 and n */}
+                  {/* Row 1: mu0, n, and power toggle */}
                   <tr className="border-b border-slate-800/80">
                     <td className="p-4 text-right align-middle text-xs sm:text-sm font-semibold border-l border-slate-800 bg-slate-950/20">
                       <div className="flex items-center gap-1.5 justify-start">
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo-600/30 text-indigo-300 font-bold shrink-0">H0</span>
-                        <InputTooltip content="תוחלת אוכלוסיית הבסיס (השערת האפס H₀)">
+                        <InputTooltip content="תוחלת אוכלוסיית הבסיס (השערת האפס H₀)" className="w-full justify-between">
                           <span className="cursor-help border-b border-dotted border-slate-500">
                             תוחלת (μ₀):
                           </span>
@@ -856,28 +988,56 @@ export default function HypothesisTestingCalculator() {
                         <div className="text-[11px] text-red-400 font-bold leading-tight mt-1 text-center">{errors.mu0}</div>
                       )}
                     </td>
-                    <td className="p-3 align-middle bg-slate-900/40">
-                      <div className="flex items-center gap-2 justify-end">
-                        <input
-                          type="text"
-                          value={testType === 'single' ? '1' : nInput}
-                          disabled={testType === 'single'}
-                          onChange={(e) => handleNChange(e.target.value)}
-                          className={`w-full bg-transparent px-3 py-1 font-mono font-bold text-right text-lg sm:text-xl text-slate-100 placeholder-slate-400 outline-none transition-all rounded focus:bg-indigo-950/10 ${
-                            testType === 'single' ? 'opacity-40 cursor-not-allowed bg-slate-100/5' : ''
-                          } ${errors.n && testType !== 'single' ? 'text-red-400 font-bold' : ''}`}
-                          placeholder="36"
-                          dir="ltr"
-                        />
+                    <td className="p-3 align-middle border-l border-slate-800 bg-slate-900/40">
+                      <div className="flex items-center justify-between gap-2 ctrl-cell-wrapper w-full">
                         <InputTooltip content="מספר התצפיות במדגם (n)">
                           <span className={`text-xs sm:text-sm text-slate-400 font-bold shrink-0 cursor-help border-b border-dotted border-slate-500 ${testType === 'single' ? 'opacity-30' : ''}`}>
-                            :(n) גודל מדגם
+                            גודל מדגם (n):
                           </span>
                         </InputTooltip>
+                        <div className="w-16 sm:w-20 shrink-0">
+                          <input
+                            type="text"
+                            value={testType === 'single' ? '1' : nInput}
+                            disabled={testType === 'single'}
+                            onChange={(e) => handleNChange(e.target.value)}
+                            className={`w-full bg-transparent px-2 py-1 font-mono font-bold text-center text-lg sm:text-xl text-slate-100 placeholder-slate-400 outline-none transition-all rounded focus:bg-indigo-950/10 ${
+                              testType === 'single' ? 'opacity-40 cursor-not-allowed bg-slate-100/5' : ''
+                            } ${errors.n && testType !== 'single' ? 'text-red-400 font-bold' : ''}`}
+                            placeholder="36"
+                            dir="ltr"
+                          />
+                        </div>
                       </div>
                       {errors.n && testType !== 'single' && (
-                        <div className="text-[11px] text-red-00 text-red-400 font-bold leading-tight mt-1 text-right">{errors.n}</div>
+                        <div className="text-[11px] text-red-400 font-bold leading-tight mt-1 text-right">{errors.n}</div>
                       )}
+                    </td>
+                    <td className="p-3 align-middle bg-slate-900/40">
+                      <div className="flex items-center gap-2 justify-center">
+                        <button
+                          type="button"
+                          onClick={() => setCalculatePower(!calculatePower)}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                            calculatePower ? 'bg-indigo-600' : 'bg-slate-700/80'
+                          }`}
+                        >
+                          <span
+                            className={`pointer-events-none flex items-center justify-center h-5 w-5 transform rounded-full bg-white shadow-md transition duration-200 ease-in-out ${
+                              calculatePower ? '-translate-x-5' : 'translate-x-0'
+                            }`}
+                          >
+                            {calculatePower ? (
+                              <div className="w-[2px] h-[10px] bg-indigo-600 rounded-full" />
+                            ) : (
+                              <div className="w-2.5 h-2.5 rounded-full border-2 border-slate-400" />
+                            )}
+                          </span>
+                        </button>
+                        <span className="text-xs sm:text-sm font-bold text-slate-300">
+                          חישוב עוצמה
+                        </span>
+                      </div>
                     </td>
                   </tr>
 
@@ -885,7 +1045,7 @@ export default function HypothesisTestingCalculator() {
                   <tr>
                     <td className="p-4 text-right align-middle text-xs sm:text-sm font-semibold border-l border-slate-800 bg-slate-950/20">
                       <div className="flex items-center gap-1.5 justify-start">
-                        <InputTooltip content={varianceKnown ? "סטיית תקן של האוכלוסייה (σ)" : "סטיית תקן מדגמית (S) המשמשת כאומד לסטיית התקן"}>
+                        <InputTooltip content={varianceKnown ? "סטיית תקן של האוכלוסייה (σ)" : "סטיית תקן מדגמית (S) המשמשת כאומד לסטיית התקן"} className="w-full justify-between">
                           <span className="cursor-help border-b border-dotted border-slate-500">
                             {varianceKnown ? 'סטיית תקן (σ):' : 'סטיית תקן (S):'}
                           </span>
@@ -907,26 +1067,53 @@ export default function HypothesisTestingCalculator() {
                         <div className="text-[11px] text-red-00 text-red-400 font-bold leading-tight mt-1 text-center">{errors.sigma}</div>
                       )}
                     </td>
-                    <td className="p-3 align-middle bg-slate-900/40">
-                      <div className="flex items-center gap-2 justify-end">
-                        <input
-                          type="text"
-                          value={mu1Input}
-                          onChange={(e) => handleMu1Change(e.target.value)}
-                          className={`w-full bg-transparent px-3 py-1 font-mono font-bold text-right text-lg sm:text-xl text-slate-100 placeholder-slate-400 outline-none transition-all rounded focus:bg-indigo-950/10 ${
-                            errors.mu1 ? 'text-red-400 font-bold' : ''
-                          }`}
-                          placeholder="108"
-                          dir="ltr"
-                        />
+                    <td className="p-3 align-middle border-l border-slate-800 bg-slate-900/40">
+                      <div className="flex items-center justify-between gap-2 ctrl-cell-wrapper w-full">
                         <InputTooltip content="ממוצע המדגם בפועל">
                           <span className="text-xs sm:text-sm text-slate-400 font-bold shrink-0 cursor-help border-b border-dotted border-slate-500">
-                            :(X̄) ממוצע מדגם
+                            ממוצע מדגם (X̄):
                           </span>
                         </InputTooltip>
+                        <div className="w-16 sm:w-20 shrink-0">
+                          <input
+                            type="text"
+                            value={mu1Input}
+                            onChange={(e) => handleMu1Change(e.target.value)}
+                            className={`w-full bg-transparent px-2 py-1 font-mono font-bold text-center text-lg sm:text-xl text-slate-100 placeholder-slate-400 outline-none transition-all rounded focus:bg-indigo-950/10 ${
+                              errors.mu1 ? 'text-red-400 font-bold' : ''
+                            }`}
+                            placeholder="108"
+                            dir="ltr"
+                          />
+                        </div>
                       </div>
                       {errors.mu1 && (
-                        <div className="text-[11px] text-red-00 text-red-400 font-bold leading-tight mt-1 text-right">{errors.mu1}</div>
+                        <div className="text-[11px] text-red-400 font-bold leading-tight mt-1 text-right">{errors.mu1}</div>
+                      )}
+                    </td>
+                    <td className={`p-3 align-middle bg-slate-900/40 transition-all ${!calculatePower ? 'opacity-30' : ''}`}>
+                      <div className="flex items-center justify-between gap-2 ctrl-cell-wrapper w-full">
+                        <InputTooltip content="התוחלת המשוערת תחת השערת המחקר האלטרנטיבית (H₁)">
+                          <span className={`text-xs sm:text-sm font-bold shrink-0 cursor-help border-b border-dotted border-slate-500 ${!calculatePower ? 'text-slate-500 opacity-50' : 'text-slate-400'}`}>
+                            ממוצע (μ₁):
+                          </span>
+                        </InputTooltip>
+                        <div className="w-16 sm:w-20 shrink-0">
+                          <input
+                            type="text"
+                            value={muH1Input}
+                            disabled={!calculatePower}
+                            onChange={(e) => handleMuH1Change(e.target.value)}
+                            className={`w-full bg-transparent px-2 py-1 font-mono font-bold text-center text-lg sm:text-xl text-slate-100 placeholder-slate-400 outline-none transition-all rounded focus:bg-indigo-950/10 ${
+                              !calculatePower ? 'opacity-40 cursor-not-allowed' : ''
+                            } ${calculatePower && errors.muH1 ? 'text-red-400 font-bold' : ''}`}
+                            placeholder="108"
+                            dir="ltr"
+                          />
+                        </div>
+                      </div>
+                      {calculatePower && errors.muH1 && (
+                        <div className="text-[11px] text-red-400 font-bold leading-tight mt-1 text-right">{errors.muH1}</div>
                       )}
                     </td>
                   </tr>
@@ -976,7 +1163,7 @@ export default function HypothesisTestingCalculator() {
           </div>
 
           {/* Main Test Statistic Type Selector */}
-          <div className="flex flex-col gap-3 shrink-0 md:w-[200px] bg-slate-950/20 border border-slate-800/60 p-4 rounded-2xl">
+          <div className="flex flex-col gap-3 shrink-0 h-[229.583px] w-[201px] bg-slate-950/20 border border-slate-800/60 p-4 rounded-2xl">
             <span className="text-xs sm:text-sm font-black text-slate-300 text-right w-full">סטטיסטי המבחן:</span>
             <div className="flex flex-col gap-2 w-full">
               {[
@@ -1124,26 +1311,23 @@ export default function HypothesisTestingCalculator() {
 
  {/* Overlapping Curves Chart */}
  <div className="rounded-3xl p-6 md:p-8 border shadow-md transition-all bg-slate-900 border-slate-800 w-full min-w-0 order-1 lg:order-1">
- <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4 mb-5">
- <h3 className="text-lg md:text-xl font-bold text-slate-100">
- ייצוג גרפי: דילמת ההתפלגויות המקבילות והחפיפה
- </h3>
+ <div className="flex flex-col md:flex-row md:items-center justify-end gap-4 border-b border-slate-800 pb-4 mb-5">
  <div className="flex flex-wrap gap-4 text-xs sm:text-sm">
- <span className="flex items-center gap-1.5 font-black text-blue-400">
- <span className="w-3 h-2 rounded bg-blue-600 inline-block" />
- התפלגות תחת H₀
+ <span className="flex items-center gap-1.5 font-black text-blue-400 select-none">
+ <span className="w-3 h-3 rounded-none bg-blue-600 inline-block" />
+ H₀
  </span>
- <span className="flex items-center gap-1.5 font-black text-amber-400">
- <span className="w-3 h-2 rounded bg-amber-500 inline-block" />
- התפלגות תחת H₁
+ <span className={`flex items-center gap-1.5 font-black transition-all cursor-pointer select-none ${calculatePower ? 'text-amber-400' : 'text-slate-500 opacity-60 hover:opacity-100'}`} onClick={() => setCalculatePower(!calculatePower)}>
+ <span className={`w-3 h-3 rounded-none inline-block ${calculatePower ? 'bg-amber-500' : 'bg-slate-700/80'}`} />
+ H₁
  </span>
- <span className="flex items-center gap-1.5 font-black text-red-400">
- <span className="w-3 h-2 rounded bg-red-600/30 border border-red-500 inline-block" />
- אזור דחייה (<InlineMath math="\alpha" />)
- </span>
- <span className="flex items-center gap-1.5 font-black text-emerald-400">
- <span className="w-3 h-2 rounded bg-emerald-500/30 border border-emerald-500 inline-block" />
- אזור עוצמה (<InlineMath math="1-\beta" />)
+ <span className="flex items-center gap-1.5 font-black text-green-400 select-none">
+  <span className="w-3 h-3 rounded-none bg-green-500/30 border border-green-500 inline-block" />
+  C (אזור דחייה)
+</span>
+ <span className={`flex items-center gap-1.5 font-black transition-all select-none ${calculatePower ? 'text-emerald-400' : 'hidden opacity-0'}`}>
+ <span className="w-3 h-3 rounded-none bg-emerald-500/30 border border-emerald-500 inline-block" />
+ 1-β
  </span>
  </div>
  </div>
@@ -1152,25 +1336,72 @@ export default function HypothesisTestingCalculator() {
  <div className="h-[380px] w-full mt-4" dir="ltr">
  <ResponsiveContainer width="100%" height="100%">
  <AreaChart data={chartData} margin={{ top: 20, right: 10, left: -25, bottom: 5 }}>
- <defs>
- <linearGradient id="h0Color" x1="0" y1="0" x2="0" y2="1">
- <stop offset="5%" stopColor={'var(--color-accent)'} stopOpacity={0.1}/>
- <stop offset="95%" stopColor={'var(--color-accent)'} stopOpacity={0}/>
- </linearGradient>
- <linearGradient id="h1Color" x1="0" y1="0" x2="0" y2="1">
- <stop offset="5%" stopColor="var(--chart-4)" stopOpacity={0.1}/>
- <stop offset="95%" stopColor="var(--chart-4)" stopOpacity={0}/>
- </linearGradient>
- </defs>
+  <defs>
+  <linearGradient id="h0Color" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="5%" stopColor={'var(--color-accent)'} stopOpacity={0.1}/>
+  <stop offset="95%" stopColor={'var(--color-accent)'} stopOpacity={0}/>
+  </linearGradient>
+  <linearGradient id="h1Color" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="5%" stopColor="var(--chart-4)" stopOpacity={0.1}/>
+  <stop offset="95%" stopColor="var(--chart-4)" stopOpacity={0}/>
+  </linearGradient>
+  {(() => {
+    if (!stats || !isValid || !chartLimits) return null;
+    const { c1, c2 } = stats;
+    const { xMin, xMax } = chartLimits;
+
+    const pct = (val) => {
+      const p = ((val - xMin) / (xMax - xMin)) * 100;
+      return Math.max(0, Math.min(100, p));
+    };
+
+    if (tailType === 'right') {
+      const c2Pct = pct(c2);
+      return (
+        <linearGradient id="rejectionGradient" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#22c55e" stopOpacity={0} />
+          <stop offset={c2Pct + "%"} stopColor="#22c55e" stopOpacity={0} />
+          <stop offset={(c2Pct + 0.001) + "%"} stopColor="#22c55e" stopOpacity={0.1} />
+          <stop offset="100%" stopColor="#22c55e" stopOpacity={1.0} />
+        </linearGradient>
+      );
+    } else if (tailType === 'left') {
+      const c2Pct = pct(c2);
+      return (
+        <linearGradient id="rejectionGradient" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#22c55e" stopOpacity={1.0} />
+          <stop offset={c2Pct + "%"} stopColor="#22c55e" stopOpacity={0.1} />
+          <stop offset={(c2Pct + 0.001) + "%"} stopColor="#22c55e" stopOpacity={0} />
+          <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
+        </linearGradient>
+      );
+    } else { // two-tailed
+      const c1Pct = pct(c1);
+      const c2Pct = pct(c2);
+      return (
+        <linearGradient id="rejectionGradient" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#22c55e" stopOpacity={1.0} />
+          <stop offset={c1Pct + "%"} stopColor="#22c55e" stopOpacity={0.1} />
+          <stop offset={(c1Pct + 0.001) + "%"} stopColor="#22c55e" stopOpacity={0} />
+          <stop offset={c2Pct + "%"} stopColor="#22c55e" stopOpacity={0} />
+          <stop offset={(c2Pct + 0.001) + "%"} stopColor="#22c55e" stopOpacity={0.1} />
+          <stop offset="100%" stopColor="#22c55e" stopOpacity={1.0} />
+        </linearGradient>
+      );
+    }
+  })()}
+  </defs>
  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={'var(--chart-grid)'} />
  
  <XAxis 
  dataKey="x" 
  type="number" 
- domain={['auto','auto']}
- tick={{ fill:'var(--chart-axis-label)', fontSize: 10 }}
+ domain={[chartLimits.xMin, chartLimits.xMax]}
+ ticks={xAxisTicks}
+ tick={{ fill:'var(--chart-axis-label)', fontSize: 13, fontWeight: 'bold' }}
  axisLine={{ stroke:'var(--chart-grid)' }}
- tickLine={false}
+ tickLine={true}
+ tickFormatter={(val) => val.toFixed(2)}
  />
  <YAxis hide={true} />
  <RechartsTooltip content={<CustomChartTooltip />} />
@@ -1187,6 +1418,7 @@ export default function HypothesisTestingCalculator() {
  />
 
  {/* H1 Curve Base Area */}
+ {calculatePower && (
  <Area 
  type="monotone" 
  dataKey="pdfH1" 
@@ -1196,18 +1428,20 @@ export default function HypothesisTestingCalculator() {
  dot={false}
  isAnimationActive={false}
  />
+ )}
 
  {/* Shaded Red Layer for Alpha Area (Type I) */}
  <Area 
- type="monotone" 
- dataKey="alphaShade" 
- stroke="none" 
- fill={'var(--chart-rejection)'} 
- dot={false}
- isAnimationActive={false}
- />
+  type="monotone" 
+  dataKey="alphaShade" 
+  stroke="none" 
+  fill="url(#rejectionGradient)" 
+  dot={false}
+  isAnimationActive={false}
+/>
 
  {/* Shaded Emerald Layer for Power Area */}
+ {calculatePower && (
  <Area 
  type="monotone" 
  dataKey="powerShade" 
@@ -1216,40 +1450,39 @@ export default function HypothesisTestingCalculator() {
  dot={false}
  isAnimationActive={false}
  />
-
- {/* Legend of distributions */}
- <Legend 
- verticalAlign="top" 
- height={40} 
- content={() => (
- <div className="flex justify-center gap-8 text-xs sm:text-sm md:text-base py-2">
- <span className="text-slate-100 font-black flex items-center gap-2 select-none">
- <span className="w-3.5 h-1.5 inline-block bg-blue-500 rounded" />
- H₀: מיקום המרכז = {stats.effectH0Mean.toFixed(2)}
- </span>
- <span className="text-slate-100 font-black flex items-center gap-2 select-none">
- <span className="w-3.5 h-1.5 inline-block bg-amber-500 rounded" />
- H₁: מיקום המרכז = {stats.effectH1Mean.toFixed(2)}
- </span>
- </div>
  )}
- />
+
+
 
  {/* Vertical Reference Line at Mean of H0 */}
  <ReferenceLine 
- x={stats.effectH0Mean} 
- stroke="var(--color-accent)" 
- strokeWidth={1.5} 
- strokeDasharray="4 4"
- />
+  x={stats.effectH0Mean} 
+  stroke="var(--color-accent)" 
+  strokeWidth={1.5} 
+  strokeDasharray="4 4"
+  label={{
+    value: "μ₀",
+    position: "top",
+    fill: "var(--color-accent)",
+    fontWeight: "bold",
+    fontSize: 12
+  }}
+  />
 
  {/* Vertical Reference Line at Mean of H1 */}
  <ReferenceLine 
- x={stats.effectH1Mean} 
- stroke="var(--chart-4)" 
- strokeWidth={1.5} 
- strokeDasharray="4 4"
- />
+  x={stats.effectH1Mean} 
+  stroke="var(--chart-4)" 
+  strokeWidth={1.5} 
+  strokeDasharray="4 4"
+  label={calculatePower ? {
+    value: "μ₁",
+    position: "top",
+    fill: "var(--chart-4)",
+    fontWeight: "bold",
+    fontSize: 12
+  } : undefined}
+  />
 
  {/* Vertical LINE for SELECTOR: Critical Values */}
  {tailType ==='two-tailed' ? (
@@ -1285,7 +1518,7 @@ export default function HypothesisTestingCalculator() {
  stroke="var(--color-error)" 
  strokeWidth={3} 
  label={{
- value: `C (קריטי): ${stats.c2.toFixed(2)}`,
+ value: `C: ${stats.c2.toFixed(2)}`,
  position:'top',
  fill:'var(--color-error)',
  fontSize: 14,
@@ -1366,15 +1599,15 @@ export default function HypothesisTestingCalculator() {
  <div className="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-3 text-right">
  <div className="flex items-center gap-2 text-indigo-300 font-extrabold justify-start">
  <span className="px-2 py-0.5 rounded text-xs bg-indigo-500/15 border border-indigo-500/30 font-mono">H0</span>
- <span>השערת האפס (Null Hypothesis)</span>
+ <span>השערת האפס</span>
  </div>
- <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
- מניחה שאין השפעה, קשר או שינוי חדש במערכת, וכי המצב הקיים נותר ללא שינוי. תוחלת האוכלוסייה שווה בדיוק לערך הבסיס שהוגדר.
- </p>
  <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800/80 text-center" dir="ltr">
  <BlockMath math={`H_0: \\mu = ${mu0}`} />
  </div>
- <p className="text-xs sm:text-sm text-indigo-200 font-bold">
+ <p className="text-xs sm:text-sm text-slate-100 leading-relaxed">
+ מניחה שאין השפעה, קשר או שינוי חדש במערכת, וכי המצב הקיים נותר ללא שינוי. תוחלת האוכלוסייה שווה בדיוק לערך הבסיס שהוגדר.
+ </p>
+ <p className="text-xs sm:text-sm text-slate-400 font-bold">
  ✍️ ניסוח מילולי: תוחלת האוכלוסייה (<InlineMath math="\mu" />) שווה ל-{mu0}.
  </p>
  </div>
@@ -1383,11 +1616,8 @@ export default function HypothesisTestingCalculator() {
  <div className="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-3 text-right">
  <div className="flex items-center gap-2 text-indigo-300 font-extrabold justify-start">
  <span className="px-2 py-0.5 rounded text-xs bg-indigo-500/15 border border-indigo-500/30 font-mono">H1</span>
- <span>השערת המחקר (Alternative Hypothesis)</span>
+ <span>השערת המחקר</span>
  </div>
- <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
- מייצגת את שאלת המחקר והשינוי שהחוקר מנסה להוכיח. כיוון הניסוח נקבע בהתאם לכיוון המבחן שהוגדר.
- </p>
  <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800/80 text-center" dir="ltr">
  {tailType === 'right' ? (
  <BlockMath math={`H_1: \\mu > ${mu0}`} />
@@ -1397,7 +1627,10 @@ export default function HypothesisTestingCalculator() {
  <BlockMath math={`H_1: \\mu \\neq ${mu0}`} />
  )}
  </div>
- <p className="text-xs sm:text-sm text-indigo-200 font-bold">
+ <p className="text-xs sm:text-sm text-slate-100 leading-relaxed">
+ מייצגת את שאלת המחקר והשינוי שהחוקר מנסה להוכיח. כיוון הניסוח נקבע בהתאם לכיוון המבחן שהוגדר.
+ </p>
+ <p className="text-xs sm:text-sm text-slate-400 font-bold">
  ✍️ ניסוח מילולי: תוחלת האוכלוסייה (<InlineMath math="\mu" />) {' '}
  {tailType === 'right' ? (
  <span>גדולה מ-{mu0} (מבחן חד-צדדי ימני).</span>
@@ -1416,7 +1649,7 @@ export default function HypothesisTestingCalculator() {
  <div className="space-y-3 pt-6">
  <div className="flex items-center gap-3 font-extrabold text-indigo-400">
  <span className="w-9 h-9 rounded-full bg-indigo-100 bg-indigo-900/50 text-base font-black flex items-center justify-center border border-indigo-300">2</span>
- <span className="text-xl sm:text-2xl font-black">חישוב שגיאת התקן (Standard Error)</span>
+ <span className="text-xl sm:text-2xl font-black">חישוב שגיאת התקן</span>
  </div>
  <p className="text-base sm:text-lg text-slate-200 leading-relaxed pr-9 font-semibold">
  {varianceKnown 
@@ -1479,7 +1712,7 @@ export default function HypothesisTestingCalculator() {
  <div className="space-y-3 pt-6">
  <div className="flex items-center gap-3 font-extrabold text-indigo-400">
  <span className="w-9 h-9 rounded-full bg-indigo-100 bg-indigo-900/50 text-base font-black flex items-center justify-center border border-indigo-300">3</span>
- <span className="text-xl sm:text-2xl font-black">מציאת ערך קריטי (Critical Value) של המבחן</span>
+ <span className="text-xl sm:text-2xl font-black">מציאת ערך קריטי של המבחן</span>
  </div>
  <p className="text-base sm:text-lg text-slate-205 leading-relaxed pr-9 font-semibold">
  {varianceKnown ? (
@@ -1525,13 +1758,13 @@ export default function HypothesisTestingCalculator() {
  <div className="space-y-3 pr-2">
  <div className="space-y-1">
  <div className="flex items-start gap-2">
- <span className="text-indigo-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
- <p className="text-xs sm:text-sm text-slate-705 text-slate-200 font-extrabold leading-relaxed">
- <strong className="text-indigo-400 font-black font-sans">אזור הדחייה (<InlineMath math="C" />):</strong> קבוצת הערכים שעבורם נחליט לדחות את השערת האפס <InlineMath math="H_0" />.
+ <span className="text-emerald-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
+ <p className="text-xs sm:text-sm text-slate-200 font-extrabold leading-relaxed">
+ <strong className="text-emerald-400 font-black font-sans">אזור הדחייה (<InlineMath math="C" />):</strong> קבוצת הערכים שעבורם נחליט לדחות את השערת האפס <InlineMath math="H_0" />.
  </p>
  </div>
  <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
- <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
+ <div className="bg-emerald-950/20 p-4 sm:p-5 rounded-2xl border-2 border-emerald-500/30 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.1)] space-y-3 text-sm sm:text-base md:text-lg font-extrabold min-w-[280px]">
  <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\ge ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
@@ -1542,13 +1775,13 @@ export default function HypothesisTestingCalculator() {
 
  <div className="space-y-1 pt-3 border-t border-dashed border-slate-800">
  <div className="flex items-start gap-2">
- <span className="text-slate-550 text-slate-405 font-extrabold text-sm sm:text-base shrink-0">●</span>
+ <span className="text-red-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
  <p className="text-xs sm:text-sm text-slate-200 font-extrabold leading-relaxed">
- <strong className="text-slate-705 text-slate-300 font-black font-sans">אזור הקבלה / אי-הדחייה (<InlineMath math="C^c" />):</strong> קבוצת הערכים המשלימה שעבורם לא נדחה את השערת האפס <InlineMath math="H_0" />.
+ <strong className="text-red-400 font-black font-sans">אזור הקבלה / אי-הדחייה (<InlineMath math="C^c" />):</strong> קבוצת הערכים המשלימה שעבורם לא נדחה את השערת האפס <InlineMath math="H_0" />.
  </p>
  </div>
  <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
- <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
+ <div className="bg-red-950/20 p-4 sm:p-5 rounded-2xl border-2 border-red-500/30 text-red-300 shadow-[0_0_12px_rgba(239,68,68,0.1)] space-y-3 text-sm sm:text-base md:text-lg font-extrabold min-w-[280px]">
  <BlockMath math={`C^c = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} < ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
@@ -1590,13 +1823,13 @@ export default function HypothesisTestingCalculator() {
  <div className="space-y-3 pr-2">
  <div className="space-y-1">
  <div className="flex items-start gap-2">
- <span className="text-indigo-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
- <p className="text-xs sm:text-sm text-slate-705 text-slate-200 font-extrabold leading-relaxed">
- <strong className="text-indigo-400 font-black font-sans">אזור הדחייה (<InlineMath math="C" />):</strong> קבוצת הערכים שעבורם נחליט לדחות את השערת האפס <InlineMath math="H_0" />.
+ <span className="text-emerald-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
+ <p className="text-xs sm:text-sm text-slate-200 font-extrabold leading-relaxed">
+ <strong className="text-emerald-400 font-black font-sans">אזור הדחייה (<InlineMath math="C" />):</strong> קבוצת הערכים שעבורם נחליט לדחות את השערת האפס <InlineMath math="H_0" />.
  </p>
  </div>
  <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
- <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
+ <div className="bg-emerald-950/20 p-4 sm:p-5 rounded-2xl border-2 border-emerald-500/30 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.1)] space-y-3 text-sm sm:text-base md:text-lg font-extrabold min-w-[280px]">
  <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\le ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
@@ -1607,13 +1840,13 @@ export default function HypothesisTestingCalculator() {
 
  <div className="space-y-1 pt-3 border-t border-dashed border-slate-800">
  <div className="flex items-start gap-2">
- <span className="text-slate-550 text-slate-405 font-extrabold text-sm sm:text-base shrink-0">●</span>
- <p className="text-xs sm:text-sm text-slate-705 text-slate-200 font-extrabold leading-relaxed">
- <strong className="text-slate-705 text-slate-300 font-black font-sans">אזור הקבלה / אי-הדחייה (<InlineMath math="C^c" />):</strong> קבוצת הערכים המשלימה שעבורם לא נדחה את השערת האפס <InlineMath math="H_0" />.
+ <span className="text-red-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
+ <p className="text-xs sm:text-sm text-slate-200 font-extrabold leading-relaxed">
+ <strong className="text-red-400 font-black font-sans">אזור הקבלה / אי-הדחייה (<InlineMath math="C^c" />):</strong> קבוצת הערכים המשלימה שעבורם לא נדחה את השערת האפס <InlineMath math="H_0" />.
  </p>
  </div>
  <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
- <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
+ <div className="bg-red-950/20 p-4 sm:p-5 rounded-2xl border-2 border-red-500/30 text-red-300 shadow-[0_0_12px_rgba(239,68,68,0.1)] space-y-3 text-sm sm:text-base md:text-lg font-extrabold min-w-[280px]">
  <BlockMath math={`C^c = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} > ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
@@ -1653,13 +1886,13 @@ export default function HypothesisTestingCalculator() {
  <div className="space-y-3 pr-2">
  <div className="space-y-1">
  <div className="flex items-start gap-2">
- <span className="text-indigo-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
- <p className="text-xs sm:text-sm text-slate-705 text-slate-200 font-extrabold leading-relaxed">
- <strong className="text-indigo-400 font-black font-sans">אזור הדחייה (<InlineMath math="C" />):</strong> קבוצת הערכים שעבורם נחליט לדחות את השערת האפס <InlineMath math="H_0" />.
+ <span className="text-emerald-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
+ <p className="text-xs sm:text-sm text-slate-200 font-extrabold leading-relaxed">
+ <strong className="text-emerald-400 font-black font-sans">אזור הדחייה (<InlineMath math="C" />):</strong> קבוצת הערכים שעבורם נחליט לדחות את השערת האפס <InlineMath math="H_0" />.
  </p>
  </div>
  <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
- <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
+ <div className="bg-emerald-950/20 p-4 sm:p-5 rounded-2xl border-2 border-emerald-500/30 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.1)] space-y-3 text-sm sm:text-base md:text-lg font-extrabold min-w-[280px]">
  <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\le ${stats.c1.toFixed(3)} \\;\\cup\\; ${statSymbol} \\ge ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
@@ -1670,13 +1903,13 @@ export default function HypothesisTestingCalculator() {
 
  <div className="space-y-1 pt-3 border-t border-dashed border-slate-800">
  <div className="flex items-start gap-2">
- <span className="text-slate-550 text-slate-405 font-extrabold text-sm sm:text-base shrink-0">●</span>
- <p className="text-xs sm:text-sm text-slate-705 text-slate-200 font-extrabold leading-relaxed">
- <strong className="text-slate-705 text-slate-300 font-black font-sans">אזור הקבלה / אי-הדחייה (<InlineMath math="C^c" />):</strong> קבוצת הערכים המשלימה שעבורם לא נדחה את השערת האפס <InlineMath math="H_0" />.
+ <span className="text-red-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
+ <p className="text-xs sm:text-sm text-slate-205 text-slate-200 font-extrabold leading-relaxed">
+ <strong className="text-red-400 font-black font-sans">אזור הקבלה / אי-הדחייה (<InlineMath math="C^c" />):</strong> קבוצת הערכים המשלימה שעבורם לא נדחה את השערת האפס <InlineMath math="H_0" />.
  </p>
  </div>
  <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
- <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
+ <div className="bg-red-950/20 p-4 sm:p-5 rounded-2xl border-2 border-red-500/30 text-red-300 shadow-[0_0_12px_rgba(239,68,68,0.1)] space-y-3 text-sm sm:text-base md:text-lg font-extrabold min-w-[280px]">
  <BlockMath math={`C^c = \\left\\{ ${statSymbol} \\;\\middle|\\; ${stats.c1.toFixed(3)} < ${statSymbol} < ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
@@ -1701,7 +1934,8 @@ export default function HypothesisTestingCalculator() {
  עוצמת המבחן מייצגת את הסיכוי להגיע להחלטת דחייה מוצדקת עבור הטענה האלטרנטיבית. אנו בודקים מה השטח של התפלגות H₁ הנופל בתוך סקטור אזור הדחייה:
  </p>
  <div className="pr-9 py-3 space-y-4 text-xl md:text-2xl">
- {varianceKnown ? (
+ {calculatePower ? (
+ varianceKnown ? (
  tailType ==='right' ? (
  <div className="space-y-3">
  <p className="text-base sm:text-lg text-slate-50 font-bold">עוצמה מעל הערך הקריטי C (תחת התפלגות Z):</p>
@@ -1776,6 +2010,15 @@ export default function HypothesisTestingCalculator() {
  </div>
  </div>
  )
+ )
+ ) : (
+ <div className="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 text-center text-slate-400 space-y-2 max-w-xl mx-auto">
+ <Info size={20} className="mx-auto text-indigo-400" />
+ <h5 className="font-extrabold text-slate-200 text-sm sm:text-base">חישוב עוצמת מבחן כבוי</h5>
+ <p className="text-xs sm:text-sm font-medium leading-relaxed">
+ על מנת להציג את שלבי החישוב המלאים של טעות מסוג שני (<InlineMath math="\\beta" />) ועוצמת המבחן (<InlineMath math="1-\\beta" />), הפעל את אפשרות "חישוב עוצמה" בתוך כרטיסיית הפרמטרים למעלה.
+ </p>
+ </div>
  )}
  </div>
  </div>
@@ -1785,29 +2028,29 @@ export default function HypothesisTestingCalculator() {
  {decisionData && (
  <div className={`mt-8 rounded-3xl p-6 md:p-8 border-2 shadow-lg transition-all text-right relative overflow-hidden ${
  decisionData.isReject 
- ?'bg-gradient-to-br from-emerald-50 to-teal-50/40 from-emerald-950/25 to-teal-950/5 border-emerald-400 border-emerald-800' 
- :'bg-gradient-to-br from-slate-50 to-slate-100/45 from-slate-900/25 to-slate-800/5 border-slate-400 border-slate-700'
+ ?'bg-gradient-to-br from-emerald-950/25 to-teal-950/5 border-emerald-800' 
+ : 'bg-gradient-to-br from-red-950/25 to-rose-950/5 border-red-800'
  }`}>
  {/* Top Accent Strip */}
- <div className={`absolute top-0 right-0 w-full h-1.5 ${decisionData.isReject ?'bg-emerald-500' :'bg-slate-500'}`} />
+ <div className={`absolute top-0 right-0 w-full h-1.5 ${decisionData.isReject ?'bg-emerald-500' :'bg-red-500'}`} />
  
  <h3 className="text-lg sm:text-xl font-black mb-4 flex items-center gap-2 pb-3 border-b border-dashed border-slate-800/85">
  {decisionData.isReject ? (
  <CheckCircle className="text-emerald-500 animate-bounce shrink-0" size={24} />
  ) : (
- <XCircle className="text-slate-500 shrink-0" size={24} />
+ <XCircle className="text-red-500 animate-pulse shrink-0" size={24} />
  )}
- <span className={`text-xl font-black ${decisionData.isReject ? 'text-emerald-900 text-emerald-300' : 'text-slate-300'}`}>
- שלב הכרעה סטטיסטית סופי 5 (Statistical Verdict)
+ <span className={`text-xl font-black ${decisionData.isReject ? 'text-emerald-300' : 'text-red-300'}`}>
+ שלב הכרעה סטטיסטית סופי 5
  </span>
- <span className="text-xs font-bold text-slate-400 text-slate-500 mr-auto font-mono">
+ <span className="text-xs font-bold text-slate-500 mr-auto font-mono">
  α = {alpha} | n = {n}
  </span>
  </h3>
 
  <div className="space-y-4">
  <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 leading-relaxed text-sm sm:text-base font-bold text-slate-200">
- <div className={`text-base sm:text-lg font-black flex justify-center items-center gap-2 ${decisionData.isReject ?'text-emerald-300' :'text-slate-300'}`}>
+ <div className={`text-base sm:text-lg font-black flex justify-center items-center gap-2 ${decisionData.isReject ?'text-emerald-300' :'text-red-300'}`}>
  <span>מצב: המדגם נמצא באזור {decisionData.isReject ? 'הדחייה' : 'הקבלה'}</span>
  <span className="mt-1"><InlineMath math={decisionData.isReject ? 'C' : '\\bar{C}'} /></span>
  </div>
@@ -1855,11 +2098,11 @@ export default function HypothesisTestingCalculator() {
  {/* Decision Matrix Hero (Moved to side panel) */}
   <div className="rounded-3xl border p-5 md:p-6 text-right relative overflow-hidden shadow-lg transition-all bg-slate-900 border-slate-800 w-full min-w-0 order-2 lg:order-2">
     <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-red-600 via-indigo-700 to-emerald-600" />
-    <h3 className="text-base sm:text-lg font-black mb-4 flex items-center gap-2 border-b border-slate-800 pb-2 text-slate-100">
+    <h3 className="hidden">
       <Award size={18} className="text-emerald-500" />
       מטריצת החלטה ורמות מובהקות
     </h3>
-    <DecisionMatrix isValid={isValid} stats={stats} alpha={alpha} />
+    <DecisionMatrix isValid={isValid} stats={stats} alpha={alpha} calculatePower={calculatePower} />
   </div>
 
   {/* Theoretical Help widget inside side panel */}
@@ -1872,7 +2115,7 @@ export default function HypothesisTestingCalculator() {
  <ul className="text-xs space-y-2 text-slate-300 leading-relaxed pr-2 list-disc list-inside font-semibold font-sans">
  <li><strong>ממוצע H₀ המרכזי</strong> מבסס את קו התחלת הבסיס להשוואה (H₀ baseline).</li>
  <li><strong>אלטרנטיבה H₁</strong> מגדירה את המיקום השני המשוער בפועל.</li>
- <li>ככל ש-<strong>גודל המדגם (n)</strong> גדול יותר, שגיאת התקן מתכווצת, הקומות הופכות צרות יותר ועוצמת המבחן משתפרת פלאים.</li>
+ <li>ככל שגודל המדגם (<InlineMath math="n" />) גדל, היכולת של המבחן להבחין אפילו באפקטים זעירים או שינויים קטנים בתוחלת משתפרת, מה שמאפשר לדחות את השערת האפס בקלות רבה יותר עבור אותה תוצאה מדגמית.</li>
  </ul>
  </div>
 
