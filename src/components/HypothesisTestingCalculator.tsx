@@ -1216,18 +1216,30 @@ export default function HypothesisTestingCalculator() {
       </div>
   {/* Dynamic Formal Hypotheses Display Banner with H1 Buttons */}
   <div className="mb-6 p-4 rounded-2xl border border-indigo-900/40 bg-indigo-950/10 flex flex-col xl:flex-row items-center justify-between gap-6 transition-all" dir="rtl">
-    <div className="flex-1 min-w-0">
+    
+    {/* Right Section: Title */}
+    <div className="flex-1 flex flex-col items-start min-w-0">
       <h4 className="text-sm font-black text-indigo-200 flex items-center gap-1.5 mb-1">
         <Award size={16} className="text-indigo-500 shrink-0" />
         הגדרת השערות ובחירת כיווני המבחן:
       </h4>
-      <span className="text-xs text-slate-400 block mt-1 leading-relaxed font-medium max-w-sm">
+      <span className="text-xs text-slate-400 block mt-1 leading-relaxed font-medium max-w-sm text-right">
         בחירת כיוון השערת המחקר, למול השערת האפס המבטאת חוסר שינוי:
       </span>
     </div>
 
-    {/* Squared Buttons for H1 */}
-    <div className="flex gap-2 shrink-0">
+    {/* Center Section: Formal Hypotheses Display */}
+    <div className="shrink-0 flex flex-col items-center justify-center p-3 bg-slate-950/90 border border-slate-800 rounded-xl min-w-[180px] text-center shadow-sm">
+      <div className="text-sm sm:text-base font-extrabold text-slate-100 font-mono tracking-wide flex justify-center w-full" dir="ltr">
+        <InlineMath math={getFormalHypothesisMath()} />
+      </div>
+      <div className="text-[10px] text-slate-500 font-mono mt-1.5 border-t border-dotted border-slate-800 pt-1 flex justify-center w-full" dir="ltr">
+        <InlineMath math={getGeneralFormalHypothesisMath()} />
+      </div>
+    </div>
+
+    {/* Left Section: Squared Buttons for H1 */}
+    <div className="flex-1 flex justify-end gap-2">
       <button 
         onClick={() => setTailType('right')} 
         className={`flex flex-col items-center justify-center w-[85px] h-16 rounded-xl border transition-all ${tailType === 'right' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300 shadow-sm' : 'bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-slate-200'}`}
@@ -1251,15 +1263,6 @@ export default function HypothesisTestingCalculator() {
       </button>
     </div>
 
-    {/* Formal Hypotheses Display */}
-    <div className="flex flex-col items-center justify-center p-3 bg-slate-950/90 border border-slate-800 rounded-xl min-w-[180px] shrink-0 text-center shadow-sm">
-      <div className="text-sm sm:text-base font-extrabold text-slate-100 font-mono tracking-wide flex justify-center w-full" dir="ltr">
-        <InlineMath math={getFormalHypothesisMath()} />
-      </div>
-      <div className="text-[10px] text-slate-500 font-mono mt-1.5 border-t border-dotted border-slate-800 pt-1 flex justify-center w-full" dir="ltr">
-        <InlineMath math={getGeneralFormalHypothesisMath()} />
-      </div>
-    </div>
   </div>
 
   {/* Popular Z & Phi Row for Hypothesis Testing */}
@@ -1312,14 +1315,14 @@ export default function HypothesisTestingCalculator() {
               <div className="absolute top-0 right-0 left-0 h-0.5 bg-gradient-to-l from-indigo-500 to-blue-500" />
             )}
             <div>
-              <div className="text-[9px] font-black text-indigo-300/90 leading-tight">{item.label}</div>
-              <div className="text-[11px] font-black text-slate-100 mt-0.5">רמת ביטחון: {item.confidence}</div>
+              <div className="text-[10px] font-black text-indigo-300/90 leading-tight">{item.label}</div>
+              <div className="text-[12px] font-black text-slate-100 mt-0.5">רמת ביטחון: {item.confidence}</div>
             </div>
             <div className="flex items-center justify-between mt-1 pt-1 border-t border-slate-800 w-full" dir="ltr">
               <div className="text-[10px] font-black text-indigo-300">
                 <InlineMath math={`Z_{crit}=${item.z.toFixed(3)}`} />
               </div>
-              <div className="text-[8px] text-slate-400 opacity-70">
+              <div className="text-[10px] text-slate-400 opacity-70">
                 <InlineMath math={`\\Phi=${item.phi.toFixed(3)}`} />
               </div>
             </div>
