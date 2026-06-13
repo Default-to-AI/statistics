@@ -1805,8 +1805,8 @@ export default function HypothesisTestingCalculator() {
  <div className="space-y-4">
  <p className="text-lg sm:text-xl text-slate-50 font-bold mb-2">
  {varianceKnown 
- ? "חד-צדדי ימני: אנו מחפשים שטח עבודה משמאל בגודל <InlineMath math="1-\\alpha" />."
- : "חד-צדדי ימני (מבחן t): אנו מאתרים בקצה הימני שטח ברמת מובהקות <InlineMath math="\\alpha" />."}
+ ? <>חד-צדדי ימני: אנו מחפשים שטח עבודה משמאל בגודל <InlineMath math="1-\\alpha" />.</>
+ : <>חד-צדדי ימני (מבחן t): אנו מאתרים בקצה הימני שטח ברמת מובהקות <InlineMath math="\\alpha" />.</>}
  </p>
  <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-lg sm:text-xl md:text-2xl text-center shadow-inner font-extrabold min-w-[280px]">
@@ -1870,8 +1870,8 @@ export default function HypothesisTestingCalculator() {
  <div className="space-y-4">
  <p className="text-lg sm:text-xl text-slate-50 font-bold mb-2">
  {varianceKnown 
- ? "חד-צדדי שמאלי: אנו מחפשים שטח קיצון שמאלי בגודל <InlineMath math="\\alpha" />."
- : "חד-צדדי שמאלי (מבחן t): אנו מחפשים שטח קיצון שמאלי בגודל <InlineMath math="\\alpha" /> בהתפלגות <InlineMath math="t" />."}
+ ? <>חד-צדדי שמאלי: אנו מחפשים שטח קיצון שמאלי בגודל <InlineMath math="\\alpha" />.</>
+ : <>חד-צדדי שמאלי (מבחן t): אנו מחפשים שטח קיצון שמאלי בגודל <InlineMath math="\\alpha" /> בהתפלגות <InlineMath math="t" />.</>}
  </p>
  <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-lg sm:text-xl md:text-2xl text-center shadow-inner font-extrabold min-w-[280px]">
