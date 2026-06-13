@@ -741,6 +741,30 @@ export default function HypothesisTestingCalculator() {
  verbalConclusion = `ברמת מובהקות של ${alpha}, אין מספיק ראיות סטטיסטיות במדגם כדי לשלול את השערת האפס, ולכן לא ניתן לקבוע כי תוחלת האוכלוסייה ${comparisonText}.`;
  }
 
+ // Calculate Exact P-Value
+ let statObs = 0;
+ let pValue = 0;
+ 
+ statObs = (xBarValue - stats.effectH0Mean) / stats.se;
+ 
+ if (stats.varianceKnown) {
+   if (tailType === 'right') {
+     pValue = 1 - normalCDF(statObs, 0, 1);
+   } else if (tailType === 'left') {
+     pValue = normalCDF(statObs, 0, 1);
+   } else {
+     pValue = 2 * Math.min(normalCDF(statObs, 0, 1), 1 - normalCDF(statObs, 0, 1));
+   }
+ } else {
+   if (tailType === 'right') {
+     pValue = 1 - studentTCDF(statObs, stats.df);
+   } else if (tailType === 'left') {
+     pValue = studentTCDF(statObs, stats.df);
+   } else {
+     pValue = 2 * Math.min(studentTCDF(statObs, stats.df), 1 - studentTCDF(statObs, stats.df));
+   }
+ }
+
  return {
  xBar: xBarValue,
  isReject,
@@ -749,7 +773,9 @@ export default function HypothesisTestingCalculator() {
  zoneRejectionTeX,
  zoneAcceptanceTeX,
  belongingExplanationText,
- formattedXBar
+ formattedXBar,
+ pValue,
+ statObs
  };
  }, [stats, isValid, mu0, mu1, alpha, tailType]);
 
