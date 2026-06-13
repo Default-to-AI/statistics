@@ -2180,7 +2180,7 @@ export default function HypothesisTestingCalculator() {
       </div>
       <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-2" dir="ltr">
         <div className="bg-slate-900/80 p-3 sm:p-4 rounded-xl border border-slate-800 text-center shadow-inner font-extrabold min-w-[280px]">
-          <BlockMath math={`P\\text{-Value} = ${tailType === 'right' ? `P(${statSymbol} > ${stats.stat.toFixed(3)})` : tailType === 'left' ? `P(${statSymbol} < ${stats.stat.toFixed(3)})` : `2 \\cdot P(|${statSymbol}| > |${stats.stat.toFixed(3)}|)`} = ${decisionData.pValue.toFixed(4)}`} />
+          <BlockMath math={`P\\text{-Value} = ${tailType === 'right' ? `P(${varianceKnown ? 'Z' : 't'} > ${decisionData.statObs.toFixed(3)})` : tailType === 'left' ? `P(${varianceKnown ? 'Z' : 't'} < ${decisionData.statObs.toFixed(3)})` : `2 \\cdot P(|${varianceKnown ? 'Z' : 't'}| > |${decisionData.statObs.toFixed(3)}|)`} = ${decisionData.pValue.toFixed(4)}`} />
         </div>
       </div>
       <p className="text-xl sm:text-2xl font-handwriting font-normal text-slate-300 text-center border-t border-slate-800/60 pt-5 mt-2" style={{ letterSpacing: '0.02em', WebkitFontSmoothing: 'antialiased' }}>
