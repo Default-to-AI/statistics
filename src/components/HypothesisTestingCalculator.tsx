@@ -226,7 +226,7 @@ function DecisionMatrix({ isValid, stats, alpha, calculatePower }: DecisionMatri
   }
 
   return (
-    <div className="w-full rounded-2xl border border-slate-800 bg-slate-950/25 overflow-hidden">
+    <div className="w-full overflow-x-auto">
       <table className="w-full text-base text-right border-collapse table-layout-fixed">
         <thead>
           <tr className="bg-slate-800/70 text-xs text-slate-200 font-black border-b border-slate-800">
